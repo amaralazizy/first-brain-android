@@ -21,4 +21,5 @@ class TasksViewModel @Inject constructor(
 
     fun complete(id: Int) = viewModelScope.launch { repo.complete(id) }
     fun skip(id: Int) = viewModelScope.launch { repo.skip(id) }
+    fun reopen(id: Int) = viewModelScope.launch { repo.reopen(id) }
 }

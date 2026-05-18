@@ -69,10 +69,4 @@
         tools:layout="@layout/fragment_history"
         xmlns:tools="http://schemas.android.com/tools" />
 
-    <fragment
-        android:id="@+id/insightsFragment"
-        android:name="com.firstbrain.ui.insights.InsightsFragment"
-        android:label="@string/title_insights"
-        tools:layout="@layout/fragment_insights"
-        xmlns:tools="http://schemas.android.com/tools" />
 </navigation>

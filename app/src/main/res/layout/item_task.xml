@@ -7,8 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="@dimen/spacing_md"
     android:layout_marginVertical="@dimen/spacing_sm"
-    app:cardCornerRadius="@dimen/card_radius"
-    app:cardElevation="@dimen/card_elevation">
+    style="@style/Widget.App.Card">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -16,84 +15,220 @@
         android:padding="@dimen/spacing_md">
 
         <TextView
-            android:id="@+id/title"
-            android:layout_width="0dp"
+            android:id="@+id/index_label"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:textColor="#33FFFFFF"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/score"
-            tools:text="Finish ML lab report" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1" />
+
+        <ProgressBar
+            android:id="@+id/priority_bar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="100dp"
+            android:layout_height="4dp"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:progress="91"
+            android:progressDrawable="@drawable/priority_progress_drawable"
+            app:layout_constraintStart_toEndOf="@id/index_label"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="12dp"/>
 
         <TextView
             android:id="@+id/score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="?attr/colorPrimary"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@id/priority_bar"
+            app:layout_constraintTop_toTopOf="@id/priority_bar"
+            app:layout_constraintBottom_toBottomOf="@id/priority_bar"
+            tools:text="91% priority" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="@color/text_white"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/priority_bar"
+            app:layout_constraintStart_toStartOf="@id/priority_bar"
+            app:layout_constraintEnd_toStartOf="@id/action_column"
+            tools:text="Submit project report to supervisor" />
+
+        <TextView
+            android:id="@+id/status_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:background="@drawable/status_bg_done"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:textStyle="bold"
             android:visibility="gone"
-            app:layout_constraintTop_toTopOf="@id/title"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="0.87"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            app:layout_constraintStart_toStartOf="@id/title"
+            tools:text="✓ Done"
             tools:visibility="visible" />
 
         <TextView
-            android:id="@+id/subtitle"
+            android:id="@+id/description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xs"
+            android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceBodySmall"
-            app:layout_constraintTop_toBottomOf="@id/title"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="High · work · 3h" />
+            android:textColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/status_label"
+            app:layout_constraintStart_toStartOf="@id/title"
+            app:layout_constraintEnd_toStartOf="@id/action_column"
+            tools:text="Final write-up for ECE 570 — overdue since yesterday." />
+
+        <LinearLayout
+            android:id="@+id/tags_row"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/description"
+            app:layout_constraintStart_toStartOf="@id/title"
+            app:layout_constraintEnd_toStartOf="@id/action_column">
+
+            <TextView
+                android:id="@+id/urgency_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/primary"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:textColor="@color/text_white"
+                android:textSize="12sp"
+                android:layout_marginEnd="8dp"
+                tools:text="Critical" />
+
+            <TextView
+                android:id="@+id/type_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/tag_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:textColor="@color/text_white"
+                android:textSize="12sp"
+                android:layout_marginEnd="8dp"
+                tools:text="work" />
+
+            <TextView
+                android:id="@+id/effort_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/tag_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:textColor="@color/text_white"
+                android:textSize="12sp"
+                tools:text="4h" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/deadline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xs"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorError"
-            app:layout_constraintTop_toBottomOf="@id/subtitle"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:text="Due May 22" />
+            android:layout_marginTop="8dp"
+            android:background="@color/tag_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:textColor="@color/text_white"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@id/tags_row"
+            app:layout_constraintStart_toStartOf="@id/title"
+            tools:text="Due 4/5/2026" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/statusChip"
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:layout_marginTop="@dimen/spacing_md"
+            app:layout_constraintTop_toBottomOf="@id/deadline"
+            app:layout_constraintStart_toStartOf="@id/title"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/explanation_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xs"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/subtitle"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="completed"
-            tools:visibility="visible" />
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:text="WHY THIS IS RANKED HERE"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            app:layout_constraintStart_toStartOf="@id/title" />
 
-        <LinearLayout
-            android:id="@+id/actionRow"
+        <TextView
+            android:id="@+id/explanation_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_sm"
-            android:gravity="end"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/deadline"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/text_white"
+            app:layout_constraintTop_toBottomOf="@id/explanation_header"
+            app:layout_constraintStart_toStartOf="@id/title"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="• deadline is close\n• High urgency\n• right day for this" />
+
+        <LinearLayout
+            android:id="@+id/action_column"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/skipBtn"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/spacing_sm"
-                android:text="@string/action_skip" />
+                android:id="@+id/completeBtn"
+                style="@style/Widget.App.Button.Done"
+                android:layout_width="72dp"
+                android:layout_height="40dp"
+                android:text="Done"
+                android:textSize="12sp"
+                android:paddingHorizontal="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="16dp"/>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/completeBtn"
+                android:id="@+id/skipBtn"
+                style="@style/Widget.App.Button.Skip"
+                android:layout_width="72dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:text="Skip"
+                android:textSize="12sp"
+                android:paddingHorizontal="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="16dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/reopenBtn"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/action_complete" />
+                android:text="Reopen"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,6 +15,7 @@ class TaskAdapter(
     private val onClick: (TaskEntity) -> Unit,
     private val onComplete: ((TaskEntity) -> Unit)? = null,
     private val onSkip: ((TaskEntity) -> Unit)? = null,
+    private val onReopen: ((TaskEntity) -> Unit)? = null,
 ) : ListAdapter<TaskEntity, TaskAdapter.VH>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -22,42 +23,64 @@ class TaskAdapter(
         return VH(binding)
     }
 
-    override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        holder.bind(getItem(position), position)
+    }
 
     inner class VH(private val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(task: TaskEntity) {
+        fun bind(task: TaskEntity, position: Int) {
+            binding.indexLabel.text = (position + 1).toString()
             binding.title.text = task.title
-            binding.subtitle.text = binding.root.context.getString(
-                R.string.task_subtitle_fmt,
-                task.urgency.name,
-                task.taskType.name,
-                task.estimatedEffort,
-            )
+            binding.description.text = task.description ?: ""
+            binding.description.visibility = if (task.description.isNullOrBlank()) android.view.View.GONE
+                                             else android.view.View.VISIBLE
+
+            val score = task.recScore ?: 0.0
+            val priorityPercent = (score * 100).toInt().coerceIn(0, 100)
+            binding.priorityBar.progress = priorityPercent
+            binding.score.text = "$priorityPercent% priority"
+
+            binding.urgencyTag.text = task.urgency.name
+            binding.typeTag.text = task.taskType.name
+            binding.effortTag.text = "${task.estimatedEffort}h"
 
             val deadline = task.deadline?.takeIf { task.hasDeadline }?.formatDate()
-            binding.deadline.text = deadline
+            binding.deadline.text = if (deadline != null) "Due $deadline" else ""
             binding.deadline.visibility = if (deadline == null) android.view.View.GONE
                                          else android.view.View.VISIBLE
 
-            val score = task.recScore
-            if (showScore && score != null) {
-                binding.score.visibility = android.view.View.VISIBLE
-                binding.score.text = score.formatScore()
+            val breakdown = com.firstbrain.data.repo.RankingHeuristic.breakdown(task)
+            val topReasons = breakdown.sortedByDescending { Math.abs(it.value) }.take(3)
+            val reasonsText = topReasons.joinToString("\n") { 
+                val symbol = if (it.value > 0) "▲" else "▼"
+                "$symbol ${it.label}"
+            }
+            binding.explanationText.text = reasonsText
+            binding.explanationHeader.visibility = if (reasonsText.isBlank()) android.view.View.GONE else android.view.View.VISIBLE
+            binding.explanationText.visibility = if (reasonsText.isBlank()) android.view.View.GONE else android.view.View.VISIBLE
+            binding.divider.visibility = if (reasonsText.isBlank()) android.view.View.GONE else android.view.View.VISIBLE
+
+            val isPending = task.status == com.firstbrain.data.local.TaskStatus.pending
+            binding.completeBtn.visibility = if (isPending) android.view.View.VISIBLE else android.view.View.GONE
+            binding.skipBtn.visibility = if (isPending) android.view.View.VISIBLE else android.view.View.GONE
+            binding.reopenBtn.visibility = if (!isPending && onReopen != null) android.view.View.VISIBLE else android.view.View.GONE
+            
+            if (task.status == com.firstbrain.data.local.TaskStatus.completed) {
+                binding.statusLabel.visibility = android.view.View.VISIBLE
+                binding.statusLabel.text = "✓ Done"
+                binding.statusLabel.setBackgroundResource(R.drawable.status_bg_done)
+            } else if (task.status == com.firstbrain.data.local.TaskStatus.skipped) {
+                binding.statusLabel.visibility = android.view.View.VISIBLE
+                binding.statusLabel.text = "— Skipped"
+                binding.statusLabel.setBackgroundResource(R.drawable.status_bg_skipped)
             } else {
-                binding.score.visibility = android.view.View.GONE
+                binding.statusLabel.visibility = android.view.View.GONE
             }
 
-            val statusVisible = task.status != TaskStatus.pending
-            binding.statusChip.visibility = if (statusVisible) android.view.View.VISIBLE
-                                            else android.view.View.GONE
-            binding.statusChip.text = task.status.name
-
-            val actionable = task.status == TaskStatus.pending && (onComplete != null || onSkip != null)
-            binding.actionRow.visibility = if (actionable) android.view.View.VISIBLE
-                                           else android.view.View.GONE
             binding.completeBtn.setOnClickListener { onComplete?.invoke(task) }
             binding.skipBtn.setOnClickListener { onSkip?.invoke(task) }
+            binding.reopenBtn.setOnClickListener { onReopen?.invoke(task) }
 
             binding.root.setOnClickListener { onClick(task) }
         }

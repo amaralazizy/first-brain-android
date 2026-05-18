@@ -30,10 +30,10 @@ class MainActivity : AppCompatActivity() {
             R.id.tasksFragment,
             R.id.analyticsFragment,
             R.id.historyFragment,
-            R.id.insightsFragment,
         )
         val appBarConfig = AppBarConfiguration(topLevel)
         binding.toolbar.setupWithNavController(navController, appBarConfig)
+
         binding.bottomNav.setupWithNavController(navController)
     }
 }

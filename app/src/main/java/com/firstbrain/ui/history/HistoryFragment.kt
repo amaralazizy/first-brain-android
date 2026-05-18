@@ -10,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.firstbrain.R
 import com.firstbrain.databinding.FragmentHistoryBinding
 import com.firstbrain.ui.common.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,15 +31,53 @@ class HistoryFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val adapter = TaskAdapter(onClick = { /* no-op */ })
+        val adapter = TaskAdapter(
+            onClick = { /* no-op */ },
+            onReopen = { vm.reopen(it.id) }
+        )
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
 
+        // Reset filter to ALL when fragment is created/restored to match TabLayout's default state
+        vm.setFilter(HistoryFilter.ALL)
+
+        binding.tabs.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+                when (tab?.position) {
+                    0 -> vm.setFilter(HistoryFilter.ALL)
+                    1 -> vm.setFilter(HistoryFilter.COMPLETED)
+                    2 -> vm.setFilter(HistoryFilter.SKIPPED)
+                }
+            }
+            override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
+            override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
+        })
+
+        val mainActivity = activity as? com.firstbrain.ui.MainActivity
+        val toolbarStats = mainActivity?.findViewById<android.view.View>(R.id.toolbar_stats)
+        val toolbarDone = mainActivity?.findViewById<android.widget.TextView>(R.id.toolbar_done_count)
+        val toolbarSkipped = mainActivity?.findViewById<android.widget.TextView>(R.id.toolbar_skipped_count)
+
+        toolbarStats?.visibility = View.VISIBLE
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                vm.history.collect {
-                    adapter.submitList(it)
-                    binding.empty.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+                launch {
+                    vm.history.collect {
+                        adapter.submitList(it) {
+                            // Explicitly notify the adapter that the whole set has changed
+                            // to force re-indexing of all visible items, even if the objects
+                            // are the same (which happens when filtering the same list).
+                            adapter.notifyDataSetChanged()
+                        }
+                        binding.empty.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+                    }
+                }
+                launch {
+                    vm.doneCount.collect { toolbarDone?.text = it.toString() }
+                }
+                launch {
+                    vm.skippedCount.collect { toolbarSkipped?.text = it.toString() }
                 }
             }
         }
@@ -46,6 +85,10 @@ class HistoryFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Hide toolbar stats when leaving History
+        val mainActivity = activity as? com.firstbrain.ui.MainActivity
+        mainActivity?.findViewById<android.view.View>(R.id.toolbar_stats)?.visibility = View.GONE
+
         binding.list.adapter = null
         _binding = null
     }

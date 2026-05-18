@@ -41,6 +41,7 @@ class TasksFragment : Fragment() {
             },
             onComplete = { vm.complete(it.id) },
             onSkip = { vm.skip(it.id) },
+            onReopen = { vm.reopen(it.id) },
         )
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
@@ -55,7 +56,11 @@ class TasksFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 vm.tasks.collect { tasks ->
-                    adapter.submitList(tasks)
+                    adapter.submitList(tasks) {
+                        // Force redraw to ensure index labels (1, 2, 3...) update correctly
+                        // after a task is deleted or the order changes.
+                        adapter.notifyDataSetChanged()
+                    }
                     binding.empty.visibility = if (tasks.isEmpty()) View.VISIBLE else View.GONE
                 }
             }

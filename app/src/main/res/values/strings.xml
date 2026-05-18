@@ -70,6 +70,7 @@
     <string name="label_completion_rate">Completion rate</string>
     <string name="label_skip_rate">Skip rate</string>
     <string name="label_avg_effort">Avg effort</string>
+    <string name="completion_rate_fmt">%s completion rate</string>
 
     <string name="insights_no_pending">No pending tasks to rank.</string>
     <string name="insights_top_score">Score %1$s — composed of:</string>

@@ -21,10 +21,10 @@ interface InteractionDao {
     suspend fun countByAction(action: InteractionAction): Int
 
     @Query("""
-        SELECT action AS action, COUNT(*) AS count
+        SELECT `action`, COUNT(*) AS count
         FROM task_interactions
         WHERE occurred_at >= :sinceMillis
-        GROUP BY action
+        GROUP BY `action`
     """)
     suspend fun actionCountsSince(sinceMillis: Long): List<ActionCount>
 }

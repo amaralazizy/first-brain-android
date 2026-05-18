@@ -37,15 +37,96 @@ class AnalyticsFragment : Fragment() {
                     binding.completedValue.text = s.completed.toString()
                     binding.skippedValue.text = s.skipped.toString()
                     binding.pendingValue.text = s.pending.toString()
-                    binding.completionRate.text = s.completionRate.formatPercent()
-                    binding.skipRate.text = s.skipRate.formatPercent()
+                    binding.completionRate.text = getString(R.string.completion_rate_fmt, s.completionRate.formatPercent())
                     binding.avgEffort.text = getString(R.string.hours_fmt, s.avgEffort)
-                    binding.interactions.text = s.interactionsLast7Days
-                        .joinToString("\n") { "${it.action}: ${it.count}" }
-                        .ifBlank { getString(R.string.empty_interactions) }
+                    binding.totalHours.text = "${s.totalHoursBacklog}h"
+
+                    setupTaskTypeChart(s.tasksByType)
+                    setupUrgencyChart(s.tasksByUrgency)
                 }
             }
         }
+    }
+
+    private fun setupTaskTypeChart(data: Map<com.firstbrain.data.local.TaskType, CategorySummary>) {
+        binding.taskTypeChartContainer.removeAllViews()
+        val maxVal = data.values.maxOfOrNull { it.total } ?: 1
+        
+        data.entries.sortedByDescending { it.value.total }.forEach { (type, stats) ->
+            addChartRow(
+                container = binding.taskTypeChartContainer,
+                label = type.name,
+                value = stats.total,
+                maxValue = maxVal,
+                color = when(type) {
+                    com.firstbrain.data.local.TaskType.work -> R.color.chart_work
+                    com.firstbrain.data.local.TaskType.personal -> R.color.chart_personal
+                    com.firstbrain.data.local.TaskType.learning -> R.color.chart_learning
+                    com.firstbrain.data.local.TaskType.health -> R.color.chart_health
+                    else -> R.color.chart_other
+                },
+                subtitle = "${stats.completed} done · ${stats.skipped} skipped"
+            )
+        }
+    }
+
+    private fun setupUrgencyChart(data: Map<com.firstbrain.data.local.Urgency, Int>) {
+        binding.urgencyChartContainer.removeAllViews()
+        val maxVal = data.values.maxOfOrNull { it } ?: 1
+        
+        com.firstbrain.data.local.Urgency.values().forEach { urgency ->
+            val count = data[urgency] ?: 0
+            addChartRow(
+                container = binding.urgencyChartContainer,
+                label = urgency.name,
+                value = count,
+                maxValue = maxVal,
+                color = when(urgency) {
+                    com.firstbrain.data.local.Urgency.Low -> R.color.urgency_low
+                    com.firstbrain.data.local.Urgency.Medium -> R.color.urgency_medium
+                    com.firstbrain.data.local.Urgency.High -> R.color.urgency_high
+                    com.firstbrain.data.local.Urgency.Critical -> R.color.urgency_critical
+                }
+            )
+        }
+    }
+
+    private fun addChartRow(
+        container: ViewGroup,
+        label: String,
+        value: Int,
+        maxValue: Int,
+        color: Int,
+        subtitle: String? = null
+    ) {
+        val inflater = LayoutInflater.from(requireContext())
+        val row = inflater.inflate(R.layout.item_chart_row, container, false)
+        
+        val labelView = row.findViewById<android.widget.TextView>(R.id.label)
+        val barView = row.findViewById<View>(R.id.bar)
+        val countView = row.findViewById<android.widget.TextView>(R.id.count)
+        val subtitleView = row.findViewById<android.widget.TextView>(R.id.subtitle)
+
+        labelView.text = label
+        countView.text = value.toString()
+        barView.setBackgroundColor(androidx.core.content.ContextCompat.getColor(requireContext(), color))
+        
+        if (subtitle != null) {
+            subtitleView.text = subtitle
+            subtitleView.visibility = View.VISIBLE
+        } else {
+            subtitleView.visibility = View.GONE
+        }
+
+        row.post {
+            val totalWidth = row.width - labelView.width - countView.width - 100 // Approximation
+            val barWidth = (totalWidth * (value.toDouble() / maxValue)).toInt().coerceAtLeast(10)
+            val params = barView.layoutParams
+            params.width = barWidth
+            barView.layoutParams = params
+        }
+
+        container.addView(row)
     }
 
     override fun onDestroyView() {

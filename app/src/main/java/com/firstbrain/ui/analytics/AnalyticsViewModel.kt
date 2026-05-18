@@ -22,6 +22,8 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
 
+data class CategorySummary(val total: Int, val completed: Int, val skipped: Int)
+
 data class AnalyticsState(
     val total: Int = 0,
     val completed: Int = 0,
@@ -30,6 +32,9 @@ data class AnalyticsState(
     val completionRate: Double = 0.0,
     val skipRate: Double = 0.0,
     val avgEffort: Double = 0.0,
+    val totalHoursBacklog: Int = 0,
+    val tasksByType: Map<com.firstbrain.data.local.TaskType, CategorySummary> = emptyMap(),
+    val tasksByUrgency: Map<com.firstbrain.data.local.Urgency, Int> = emptyMap(),
     val interactionsLast7Days: List<ActionCount> = emptyList(),
 )
 
@@ -66,6 +71,19 @@ class AnalyticsViewModel @Inject constructor(
         val total = tasks.size
         val avg = if (tasks.isEmpty()) 0.0
                   else tasks.sumOf { it.estimatedEffort.toDouble() } / tasks.size
+        
+        val backlog = tasks.filter { it.status == TaskStatus.pending }.sumOf { it.estimatedEffort }
+        
+        val byType = tasks.groupBy { it.taskType }.mapValues { (_, group) ->
+            CategorySummary(
+                total = group.size,
+                completed = group.count { it.status == TaskStatus.completed },
+                skipped = group.count { it.status == TaskStatus.skipped }
+            )
+        }
+        
+        val byUrgency = tasks.groupBy { it.urgency }.mapValues { it.value.size }
+
         return AnalyticsState(
             total = total,
             completed = completed,
@@ -74,6 +92,9 @@ class AnalyticsViewModel @Inject constructor(
             completionRate = if (total == 0) 0.0 else completed.toDouble() / total,
             skipRate = if (total == 0) 0.0 else skipped.toDouble() / total,
             avgEffort = avg,
+            totalHoursBacklog = backlog,
+            tasksByType = byType,
+            tasksByUrgency = byUrgency,
             interactionsLast7Days = counts,
         )
     }
