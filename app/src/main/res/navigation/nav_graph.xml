@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/todaysPicksFragment">
+
+    <fragment
+        android:id="@+id/todaysPicksFragment"
+        android:name="com.firstbrain.ui.today.TodaysPicksFragment"
+        android:label="@string/title_today"
+        tools:layout="@layout/fragment_todays_picks"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_today_to_detail"
+            app:destination="@id/taskDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tasksFragment"
+        android:name="com.firstbrain.ui.tasks.TasksFragment"
+        android:label="@string/title_tasks"
+        tools:layout="@layout/fragment_tasks"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_tasks_to_detail"
+            app:destination="@id/taskDetailFragment" />
+        <action
+            android:id="@+id/action_tasks_to_add"
+            app:destination="@id/addEditTaskFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addEditTaskFragment"
+        android:name="com.firstbrain.ui.addedit.AddEditTaskFragment"
+        android:label="@string/title_add_task"
+        tools:layout="@layout/fragment_add_edit_task"
+        xmlns:tools="http://schemas.android.com/tools">
+        <argument
+            android:name="taskId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/taskDetailFragment"
+        android:name="com.firstbrain.ui.detail.TaskDetailFragment"
+        android:label="@string/title_task_detail"
+        tools:layout="@layout/fragment_task_detail"
+        xmlns:tools="http://schemas.android.com/tools">
+        <argument
+            android:name="taskId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_detail_to_edit"
+            app:destination="@id/addEditTaskFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/analyticsFragment"
+        android:name="com.firstbrain.ui.analytics.AnalyticsFragment"
+        android:label="@string/title_analytics"
+        tools:layout="@layout/fragment_analytics"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.firstbrain.ui.history.HistoryFragment"
+        android:label="@string/title_history"
+        tools:layout="@layout/fragment_history"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+    <fragment
+        android:id="@+id/insightsFragment"
+        android:name="com.firstbrain.ui.insights.InsightsFragment"
+        android:label="@string/title_insights"
+        tools:layout="@layout/fragment_insights"
+        xmlns:tools="http://schemas.android.com/tools" />
+</navigation>

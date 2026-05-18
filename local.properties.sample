@@ -1,0 +1,5 @@
+## Copy to local.properties (gitignored) before building.
+## Android Studio writes sdk.dir automatically on first sync — only needed
+## for headless builds (./gradlew assembleDebug from CI / shell).
+
+sdk.dir=/path/to/Android/sdk

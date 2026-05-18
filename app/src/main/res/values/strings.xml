@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">First Brain</string>
+
+    <string name="nav_today">Today</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_analytics">Analytics</string>
+    <string name="nav_history">History</string>
+    <string name="nav_insights">Insights</string>
+
+    <string name="title_today">Today\'s Picks</string>
+    <string name="title_tasks">Tasks</string>
+    <string name="title_add_task">New task</string>
+    <string name="title_task_detail">Task</string>
+    <string name="title_analytics">Analytics</string>
+    <string name="title_history">History</string>
+    <string name="title_insights">ML Insights</string>
+
+    <string name="action_complete">Complete</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_reopen">Reopen</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_save">Save</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_pick_deadline">Pick date</string>
+    <string name="action_clear">Clear</string>
+
+    <string name="cd_add_task">Add task</string>
+
+    <string name="empty_picks">No picks yet. Add a task to get started.</string>
+    <string name="empty_tasks">No tasks. Tap + to add one.</string>
+    <string name="empty_history">No completed or skipped tasks yet.</string>
+    <string name="empty_interactions">No interactions in the last 7 days.</string>
+
+    <string name="field_title">Title</string>
+    <string name="field_description">Description</string>
+    <string name="field_urgency">Urgency</string>
+    <string name="field_type">Type</string>
+    <string name="field_effort">Estimated effort (hours)</string>
+
+    <string name="urgency_low">Low</string>
+    <string name="urgency_medium">Medium</string>
+    <string name="urgency_high">High</string>
+    <string name="urgency_critical">Critical</string>
+
+    <string name="type_work">Work</string>
+    <string name="type_personal">Personal</string>
+    <string name="type_learning">Learning</string>
+    <string name="type_health">Health</string>
+    <string name="type_other">Other</string>
+
+    <string name="default_effort">1</string>
+    <string name="no_deadline">No deadline</string>
+    <string name="no_description">No description.</string>
+    <string name="no_score">Not yet ranked</string>
+    <string name="no_interactions">No interactions logged.</string>
+    <string name="no_explanations">No explanations available.</string>
+
+    <string name="section_score">Recommendation score</string>
+    <string name="section_interactions">Recent interactions</string>
+    <string name="section_totals">Totals</string>
+    <string name="section_rates">Rates</string>
+    <string name="section_recent_actions">Last 7 days</string>
+    <string name="section_explanations">Why this task ranks highest</string>
+
+    <string name="label_total">Total</string>
+    <string name="label_completed">Completed</string>
+    <string name="label_skipped">Skipped</string>
+    <string name="label_pending">Pending</string>
+    <string name="label_completion_rate">Completion rate</string>
+    <string name="label_skip_rate">Skip rate</string>
+    <string name="label_avg_effort">Avg effort</string>
+
+    <string name="insights_no_pending">No pending tasks to rank.</string>
+    <string name="insights_top_score">Score %1$s — composed of:</string>
+
+    <string name="task_subtitle_fmt">%1$s · %2$s · %3$dh</string>
+    <string name="detail_meta_fmt">%1$s · %2$s · %3$dh · skipped %4$d×</string>
+    <string name="detail_created_fmt">Created %1$s</string>
+    <string name="hours_fmt">%.1f h</string>
+</resources>

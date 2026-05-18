@@ -1,0 +1,32 @@
+package com.firstbrain.data.local
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface InteractionDao {
+
+    @Insert
+    suspend fun insert(interaction: InteractionEntity): Long
+
+    @Query("SELECT * FROM task_interactions WHERE task_id = :taskId ORDER BY occurred_at DESC")
+    fun observeForTask(taskId: Int): Flow<List<InteractionEntity>>
+
+    @Query("SELECT * FROM task_interactions ORDER BY occurred_at DESC LIMIT :limit")
+    fun observeRecent(limit: Int = 200): Flow<List<InteractionEntity>>
+
+    @Query("SELECT COUNT(*) FROM task_interactions WHERE action = :action")
+    suspend fun countByAction(action: InteractionAction): Int
+
+    @Query("""
+        SELECT action AS action, COUNT(*) AS count
+        FROM task_interactions
+        WHERE occurred_at >= :sinceMillis
+        GROUP BY action
+    """)
+    suspend fun actionCountsSince(sinceMillis: Long): List<ActionCount>
+}
+
+data class ActionCount(val action: InteractionAction, val count: Int)
