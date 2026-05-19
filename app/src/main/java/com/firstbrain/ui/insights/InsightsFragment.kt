@@ -43,14 +43,23 @@ class InsightsFragment : Fragment() {
                         binding.explanations.text = getString(R.string.no_explanations)
                     } else {
                         binding.status.text = top.title
-                        binding.message.text = getString(
-                            R.string.insights_top_score, top.recScore?.formatScore() ?: "—",
-                        )
-                        binding.explanations.text = s.contributions
-                            .sortedByDescending { kotlin.math.abs(it.shap_value) }
-                            .joinToString("\n") {
-                                String.format(Locale.getDefault(), "%-22s %+.2f", it.feature, it.shap_value)
+                        if (top.recScore == null) {
+                            binding.message.text = getString(R.string.priority_pending_offline)
+                            binding.explanations.text = getString(R.string.explanations_pending_offline)
+                        } else {
+                            binding.message.text = getString(
+                                R.string.insights_top_score, top.recScore.formatScore(),
+                            )
+                            binding.explanations.text = if (s.contributions.isEmpty()) {
+                                getString(R.string.explanations_pending_offline)
+                            } else {
+                                s.contributions
+                                    .sortedByDescending { kotlin.math.abs(it.shap_value) }
+                                    .joinToString("\n") {
+                                        String.format(Locale.getDefault(), "%-22s %+.2f", it.feature, it.shap_value)
+                                    }
                             }
+                        }
                     }
                 }
             }

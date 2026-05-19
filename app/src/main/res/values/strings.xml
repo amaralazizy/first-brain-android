@@ -97,4 +97,8 @@
     <string name="auth_error_empty_fields">All fields are required.</string>
     <string name="auth_error_password_short">Password must be at least 8 characters.</string>
     <string name="auth_error_generic">Could not authenticate. Check your details and try again.</string>
+
+    <!-- Offline placeholders -->
+    <string name="priority_pending_offline">Priority will be calculated once you\'re online.</string>
+    <string name="explanations_pending_offline">ML insights will be available once you\'re online.</string>
 </resources>

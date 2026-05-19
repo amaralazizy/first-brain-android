@@ -42,10 +42,17 @@ class TaskAdapter(
             binding.description.visibility = if (task.description.isNullOrBlank()) android.view.View.GONE
                                              else android.view.View.VISIBLE
 
-            val score = task.recScore ?: 0.0
-            val priorityPercent = (score * 100).toInt().coerceIn(0, 100)
-            binding.priorityBar.progress = priorityPercent
-            binding.score.text = "$priorityPercent% priority"
+            val score = task.recScore
+            if (score == null) {
+                binding.priorityBar.progress = 0
+                binding.priorityBar.visibility = android.view.View.GONE
+                binding.score.text = binding.root.context.getString(R.string.priority_pending_offline)
+            } else {
+                val priorityPercent = (score * 100).toInt().coerceIn(0, 100)
+                binding.priorityBar.visibility = android.view.View.VISIBLE
+                binding.priorityBar.progress = priorityPercent
+                binding.score.text = "$priorityPercent% priority"
+            }
 
             binding.urgencyTag.text = task.urgency.name
             binding.typeTag.text = task.taskType.name
@@ -59,13 +66,17 @@ class TaskAdapter(
             val contributions = task.explanationJson?.let { raw ->
                 runCatching { explanationJson.decodeFromString(explanationSerializer, raw) }.getOrNull()
             } ?: emptyList()
-            val reasonsText = contributions
-                .sortedByDescending { kotlin.math.abs(it.shap_value) }
-                .take(3)
-                .joinToString("\n") {
-                    val symbol = if (it.shap_value > 0) "▲" else "▼"
-                    "$symbol ${it.feature}"
-                }
+            val reasonsText = when {
+                contributions.isNotEmpty() -> contributions
+                    .sortedByDescending { kotlin.math.abs(it.shap_value) }
+                    .take(3)
+                    .joinToString("\n") {
+                        val symbol = if (it.shap_value > 0) "▲" else "▼"
+                        "$symbol ${it.feature}"
+                    }
+                task.recScore == null -> binding.root.context.getString(R.string.explanations_pending_offline)
+                else -> ""
+            }
             binding.explanationText.text = reasonsText
             binding.explanationHeader.visibility = if (reasonsText.isBlank()) android.view.View.GONE else android.view.View.VISIBLE
             binding.explanationText.visibility = if (reasonsText.isBlank()) android.view.View.GONE else android.view.View.VISIBLE

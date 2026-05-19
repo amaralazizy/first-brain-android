@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.firstbrain.data.repo.TaskRepository
 import com.firstbrain.data.sync.SyncRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -29,11 +30,14 @@ class SyncWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
     private val syncRepository: SyncRepository,
+    private val taskRepository: TaskRepository,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val result = syncRepository.syncAll()
-        return if (result.isSuccess) Result.success() else Result.retry()
+        val syncResult = syncRepository.syncAll()
+        // Network is up — refresh ML scores so cards stop showing the "offline" placeholder.
+        runCatching { taskRepository.rescoreAll() }
+        return if (syncResult.isSuccess) Result.success() else Result.retry()
     }
 
     companion object {
