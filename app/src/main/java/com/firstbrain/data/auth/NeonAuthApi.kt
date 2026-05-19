@@ -5,6 +5,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.POST
 
 @Serializable
@@ -39,6 +40,9 @@ data class JwtResponse(
     val token: String,
 )
 
+@Serializable
+class EmptyBody
+
 interface NeonAuthApi {
 
     @POST("sign-up/email")
@@ -53,10 +57,12 @@ interface NeonAuthApi {
         @Body body: SignInRequest,
     ): Response<AuthResponse>
 
+    @Headers("Content-Type: application/json")
     @POST("sign-out")
     suspend fun signOut(
         @Header("Cookie") cookie: String,
         @Header("Origin") origin: String = AuthConstants.ORIGIN,
+        @Body body: EmptyBody = EmptyBody(),
     )
 
     /** Exchange a session cookie for a short-lived JWT (Ed25519, 15 min). */
