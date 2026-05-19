@@ -31,11 +31,12 @@ from typing import Any, Literal
 import numpy as np
 import pandas as pd
 import shap
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import model_store
+from auth import get_current_user
 from data_simulation import simulate_dataset
 from evaluation import evaluate
 from features import FeatureEngineer
@@ -227,7 +228,7 @@ def metrics() -> dict:
 
 
 @app.post("/recommend", response_model=list[ScoredTask])
-def recommend(req: RecommendRequest) -> list[ScoredTask]:
+def recommend(req: RecommendRequest, user_id: str = Depends(get_current_user)) -> list[ScoredTask]:
     if _model is None or _engineer is None or _shap_explainer is None:
         raise HTTPException(status_code=503, detail="Model not ready")
     if not req.tasks:
@@ -255,7 +256,7 @@ def recommend(req: RecommendRequest) -> list[ScoredTask]:
 
 
 @app.post("/train", response_model=TrainResponse)
-def train() -> TrainResponse:
+def train(user_id: str = Depends(get_current_user)) -> TrainResponse:
     t0 = time.perf_counter()
     new_metrics = _train_and_persist()
     return TrainResponse(
@@ -266,9 +267,10 @@ def train() -> TrainResponse:
 
 
 @app.post("/feedback", status_code=204)
-def feedback(event: FeedbackEvent) -> None:
+def feedback(event: FeedbackEvent, user_id: str = Depends(get_current_user)) -> None:
     _FEEDBACK_PATH.parent.mkdir(exist_ok=True)
     record = {
+        "user_id": user_id,
         "task_id": event.task_id,
         "action": event.action,
         "score": event.score,
