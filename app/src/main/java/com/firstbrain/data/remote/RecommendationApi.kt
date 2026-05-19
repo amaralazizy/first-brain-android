@@ -6,91 +6,73 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 @Serializable
-data class RecommendationRequest(
-    val tasks: List<TaskFeatureWrapper>
-)
-
-@Serializable
-data class TaskFeatureWrapper(
-    val id: String,
-    val features: TaskFeatures
-)
-
-@Serializable
 data class TaskFeatures(
-    val priority: Int,
-    val estimated_duration: Int,
-    val is_recurring: Int,
-    val deadline_dist: Double,
-    val energy_required: Int,
-    val is_work: Int,
-    val is_personal: Int,
-    val is_health: Int,
-    val is_other: Int,
-    val day_of_week: Int,
-    val hour_of_day: Int,
-    val current_energy: Int,
-    val work_load: Int,
-    val recent_completion_rate: Double,
-    val is_morning: Int,
-    val is_afternoon: Int,
-    val is_evening: Int
+    val id: Int,
+    val days_since_creation: Double,
+    val days_since_last_interaction: Double,
+    val days_until_deadline: Double,
+    val is_overdue: Int,
+    val deadline_proximity: Double,
+    val skip_count: Int,
+    val estimated_effort: Int,
+    val has_deadline: Int,
+    val weekday: Int,
+    val is_weekend: Int,
+    val task_type: String, // Do | Learn | Life | Idea
+    val urgency: String    // Low | Medium | High
 )
 
 @Serializable
-data class RecommendationResponse(
-    val id: String,
-    val score: Double,
-    val explanations: List<Explanation>
+data class RecommendRequest(
+    val tasks: List<TaskFeatures>,
+    val top_k: Int = 5
 )
 
 @Serializable
-data class Explanation(
+data class FeatureContribution(
     val feature: String,
-    val impact: Double
+    val shap_value: Double
+)
+
+@Serializable
+data class ScoredTask(
+    val id: Int,
+    val score: Double,
+    val explanation: List<FeatureContribution>
 )
 
 @Serializable
 data class HealthResponse(
     val status: String,
-    val model_loaded: Boolean,
-    val last_training: String? = null
-)
-
-@Serializable
-data class MetricsResponse(
+    val model_ready: Boolean,
+    val trained_at: String? = null,
     val roc_auc: Double? = null,
-    val precision_at_5: Double? = null,
-    val recall_at_5: Double? = null,
-    val f1: Double? = null,
-    val avg_precision: Double? = null,
-    val calibration_error: Double? = null
+    val precision_at_5: Double? = null
 )
 
 @Serializable
 data class TrainResponse(
-    val status: String,
-    val metrics: MetricsResponse? = null,
-    val message: String? = null
+    val metrics: Map<String, kotlinx.serialization.json.JsonElement> = emptyMap(),
+    val trained_at: String,
+    val duration_seconds: Double
 )
 
 @Serializable
 data class FeedbackRequest(
-    val task_id: String,
-    val action: String,
-    val timestamp: String,
-    val features: TaskFeatures? = null
+    val task_id: Int,
+    val action: String, // "complete" | "skip"
+    val score: Double? = null
 )
 
 interface RecommendationApi {
     @POST("recommend")
-    suspend fun recommend(@Body request: RecommendationRequest): List<RecommendationResponse>
+    suspend fun recommend(@Body request: RecommendRequest): List<ScoredTask>
 
     @GET("health")
     suspend fun checkHealth(): HealthResponse
 
     @GET("metrics")
-    suspend fun getMetrics(): MetricsResponse
+    suspend fun getMetrics(): Map<String, kotlinx.serialization.json.JsonElement>
 
     @POST("train")
     suspend fun triggerTraining(): TrainResponse

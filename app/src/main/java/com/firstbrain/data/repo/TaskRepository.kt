@@ -16,17 +16,16 @@ import com.firstbrain.di.IoDispatcher
 import com.firstbrain.worker.ReminderWorker
 import com.firstbrain.data.remote.FeedbackRequest
 import com.firstbrain.data.remote.RecommendationApi
-import com.firstbrain.data.remote.RecommendationRequest
-import com.firstbrain.data.remote.TaskFeatureWrapper
+import com.firstbrain.data.remote.RecommendRequest
 import com.firstbrain.data.remote.TaskFeatures
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -80,22 +79,18 @@ class TaskRepository @Inject constructor(
         val deadline = task.deadline ?: return
         val now = Instant.now()
 
-        // 1. One day before
         val oneDayBefore = deadline.minus(Duration.ofDays(1))
         if (oneDayBefore.isAfter(now)) {
             val delay = Duration.between(now, oneDayBefore).toMillis()
             enqueueReminder(task.id, delay, ReminderWorker.TYPE_ONE_DAY)
         }
 
-        // 2. Effort + 1 hour before
-        // estimatedEffort is in hours
         val finalCallTime = deadline.minus(Duration.ofHours(task.estimatedEffort.toLong() + 1))
         if (finalCallTime.isAfter(now)) {
             val delay = Duration.between(now, finalCallTime).toMillis()
             enqueueReminder(task.id, delay, ReminderWorker.TYPE_FINAL_CALL)
         }
 
-        // 3. At deadline
         if (deadline.isAfter(now)) {
             val delay = Duration.between(now, deadline).toMillis()
             enqueueReminder(task.id, delay, ReminderWorker.TYPE_DEADLINE)
@@ -166,75 +161,85 @@ class TaskRepository @Inject constructor(
         )
     }
 
-    /** Recompute the heuristic score for every pending task using the AI Model API. */
+    /** Recompute the score for every pending task using the AI Model API. */
     suspend fun rescoreAll() = withContext(io) {
         val pendingTasks = taskDao.pending()
         if (pendingTasks.isEmpty()) return@withContext
 
         val now = Instant.now()
         val zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault())
-        
-        // Prepare features for all tasks
-        val wrappers = pendingTasks.map { task ->
-            TaskFeatureWrapper(
-                id = task.id.toString(),
-                features = mapToFeatures(task, zdt, pendingTasks.size)
-            )
-        }
+
+        val features = pendingTasks.map { mapToFeatures(it, zdt) }
 
         try {
-            val scores = recommendationApi.recommend(RecommendationRequest(wrappers))
-            
-            // Update local DB with new scores
+            val scores = recommendationApi.recommend(
+                RecommendRequest(tasks = features, top_k = features.size)
+            )
             scores.forEach { response ->
-                val taskId = response.id.toIntOrNull() ?: return@forEach
-                taskDao.updateScore(taskId, response.score)
-                // Note: In a full implementation, you'd also save response.explanations 
-                // to a local table to power the Insights screen.
+                taskDao.updateScore(response.id, response.score)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            // Fallback to local heuristic if API fails
             pendingTasks.forEach { task ->
                 taskDao.updateScore(task.id, RankingHeuristic.score(task, now))
             }
         }
     }
 
-    private fun mapToFeatures(task: TaskEntity, now: ZonedDateTime, totalPending: Int): TaskFeatures {
-        val deadlineDist = if (task.hasDeadline && task.deadline != null) {
-            val days = Duration.between(now.toInstant(), task.deadline).toHours() / 24.0
-            max(0.0, days)
-        } else {
-            7.0 // Default far distance
-        }
+    private fun mapToFeatures(task: TaskEntity, now: ZonedDateTime): TaskFeatures {
+        val nowInstant = now.toInstant()
+        val daysSinceCreation = Duration.between(task.createdAt, nowInstant).toHours() / 24.0
+        val daysSinceLastInteraction = Duration.between(
+            task.lastInteractedAt ?: task.createdAt,
+            nowInstant
+        ).toHours() / 24.0
 
-        val hour = now.hour
-        
+        val daysUntilDeadline = task.deadline?.let {
+            Duration.between(nowInstant, it).toHours() / 24.0
+        } ?: 9999.0
+        val isOverdue = if (task.hasDeadline && daysUntilDeadline < 0) 1 else 0
+        val deadlineProximity = if (task.hasDeadline) {
+            1.0 / (1.0 + max(0.0, daysUntilDeadline))
+        } else 0.0
+
+        val weekday = now.dayOfWeek.value % 7 // Mon=1..Sun=7 → Mon=1..Sat=6,Sun=0
+        val isWeekend = if (now.dayOfWeek == DayOfWeek.SATURDAY || now.dayOfWeek == DayOfWeek.SUNDAY) 1 else 0
+
         return TaskFeatures(
-            priority = when(task.urgency) {
-                Urgency.Low -> 1
-                Urgency.Medium -> 2
-                Urgency.High -> 3
-                Urgency.Critical -> 4
-            },
-            estimated_duration = task.estimatedEffort * 60, // Convert hours to minutes
-            is_recurring = 0, // Not tracked in current schema
-            deadline_dist = deadlineDist,
-            energy_required = 3, // Default medium
-            is_work = if (task.taskType == TaskType.work) 1 else 0,
-            is_personal = if (task.taskType == TaskType.personal) 1 else 0,
-            is_health = if (task.taskType == TaskType.health) 1 else 0,
-            is_other = if (task.taskType == TaskType.other || task.taskType == TaskType.learning) 1 else 0,
-            day_of_week = now.dayOfWeek.value,
-            hour_of_day = hour,
-            current_energy = 3, // Default
-            work_load = totalPending,
-            recent_completion_rate = 0.7, // Placeholder for interaction analytics
-            is_morning = if (hour in 5..11) 1 else 0,
-            is_afternoon = if (hour in 12..16) 1 else 0,
-            is_evening = if (hour in 17..21) 1 else 0
+            id = task.id,
+            days_since_creation = daysSinceCreation,
+            days_since_last_interaction = daysSinceLastInteraction,
+            days_until_deadline = daysUntilDeadline,
+            is_overdue = isOverdue,
+            deadline_proximity = deadlineProximity,
+            skip_count = task.skipCount,
+            estimated_effort = task.estimatedEffort,
+            has_deadline = if (task.hasDeadline) 1 else 0,
+            weekday = weekday,
+            is_weekend = isWeekend,
+            task_type = mapTaskType(task.taskType),
+            urgency = mapUrgency(task.urgency)
         )
+    }
+
+    private fun mapTaskType(t: TaskType): String = when (t) {
+        TaskType.work -> "Do"
+        TaskType.learning -> "Learn"
+        TaskType.personal -> "Life"
+        TaskType.health -> "Life"
+        TaskType.other -> "Idea"
+    }
+
+    private fun mapUrgency(u: Urgency): String = when (u) {
+        Urgency.Low -> "Low"
+        Urgency.Medium -> "Medium"
+        Urgency.High, Urgency.Critical -> "High"
+    }
+
+    private fun mapFeedbackAction(action: InteractionAction): String? = when (action) {
+        InteractionAction.completed -> "complete"
+        InteractionAction.skipped, InteractionAction.snoozed -> "skip"
+        InteractionAction.viewed, InteractionAction.reopened -> null
     }
 
     private suspend fun mutate(
@@ -249,20 +254,18 @@ class TaskRepository @Inject constructor(
             InteractionEntity(taskId = id, action = action, occurredAt = Instant.now()),
         )
 
-        // Send feedback to AI model
-        try {
-            val now = ZonedDateTime.now()
-            val pendingCount = taskDao.pending().size
-            recommendationApi.sendFeedback(
-                FeedbackRequest(
-                    task_id = id.toString(),
-                    action = action.name,
-                    timestamp = now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                    features = mapToFeatures(current, now, pendingCount)
+        mapFeedbackAction(action)?.let { serverAction ->
+            try {
+                recommendationApi.sendFeedback(
+                    FeedbackRequest(
+                        task_id = id,
+                        action = serverAction,
+                        score = current.recScore
+                    )
                 )
-            )
-        } catch (e: Exception) {
-            e.printStackTrace() // Silent failure for feedback
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         rescoreAll()
