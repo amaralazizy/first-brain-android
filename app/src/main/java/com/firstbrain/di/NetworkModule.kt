@@ -34,6 +34,9 @@ object NetworkModule {
     fun provideJson(): Json = Json {
         ignoreUnknownKeys = true
         coerceInputValues = true
+        // PostgREST bulk upsert requires every row to share keys; encoding defaults
+        // (including null defaults) keeps the shape consistent across rows.
+        encodeDefaults = true
     }
 
     @Provides

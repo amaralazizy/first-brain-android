@@ -27,6 +27,4 @@ data class TaskRemoteDto(
     val completed_at: String? = null,
     val last_interacted_at: String? = null,
     val deleted: Boolean = false,
-    /** Present on server responses; never sent on writes. */
-    val user_id: String? = null,
 )
