@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
     alias(libs.plugins.navigation.safeargs)
@@ -76,6 +77,12 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.fragment)
     kapt(libs.hilt.compiler)
+
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.kotlinx.coroutines.android)
 
