@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.work.WorkManager
 import com.firstbrain.data.local.AppDatabase
+import com.firstbrain.data.local.FeedbackOutboxDao
 import com.firstbrain.data.local.InteractionDao
 import com.firstbrain.data.local.TaskDao
 import dagger.Module
@@ -26,6 +27,7 @@ object DatabaseModule {
 
     @Provides fun taskDao(db: AppDatabase): TaskDao = db.taskDao()
     @Provides fun interactionDao(db: AppDatabase): InteractionDao = db.interactionDao()
+    @Provides fun feedbackOutboxDao(db: AppDatabase): FeedbackOutboxDao = db.feedbackOutboxDao()
 
     @Provides
     @Singleton

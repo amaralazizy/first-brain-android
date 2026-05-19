@@ -86,6 +86,8 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
 
+    implementation(libs.androidx.security.crypto)
+
     debugImplementation(libs.leakcanary)
 
     testImplementation(libs.junit)

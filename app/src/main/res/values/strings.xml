@@ -79,4 +79,22 @@
     <string name="detail_meta_fmt">%1$s · %2$s · %3$dh · skipped %4$d×</string>
     <string name="detail_created_fmt">Created %1$s</string>
     <string name="hours_fmt">%.1f h</string>
+
+    <!-- Auth -->
+    <string name="title_login">Sign in</string>
+    <string name="title_signup">Create account</string>
+    <string name="auth_welcome">First Brain</string>
+    <string name="auth_subtitle_login">Welcome back. Sign in to sync your tasks.</string>
+    <string name="auth_subtitle_signup">Create an account to sync tasks across devices.</string>
+    <string name="field_email">Email</string>
+    <string name="field_password">Password</string>
+    <string name="field_name">Name</string>
+    <string name="action_signin">Sign in</string>
+    <string name="action_signup">Sign up</string>
+    <string name="action_signout">Sign out</string>
+    <string name="auth_switch_to_signup">No account? Sign up</string>
+    <string name="auth_switch_to_login">Already have an account? Sign in</string>
+    <string name="auth_error_empty_fields">All fields are required.</string>
+    <string name="auth_error_password_short">Password must be at least 8 characters.</string>
+    <string name="auth_error_generic">Could not authenticate. Check your details and try again.</string>
 </resources>

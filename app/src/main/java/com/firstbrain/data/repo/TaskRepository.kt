@@ -4,6 +4,8 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.firstbrain.data.local.FeedbackOutboxDao
+import com.firstbrain.data.local.FeedbackOutboxEntity
 import com.firstbrain.data.local.InteractionAction
 import com.firstbrain.data.local.InteractionDao
 import com.firstbrain.data.local.InteractionEntity
@@ -14,7 +16,7 @@ import com.firstbrain.data.local.TaskType
 import com.firstbrain.data.local.Urgency
 import com.firstbrain.di.IoDispatcher
 import com.firstbrain.worker.ReminderWorker
-import com.firstbrain.data.remote.FeedbackRequest
+import com.firstbrain.worker.SyncWorker
 import com.firstbrain.data.remote.RecommendationApi
 import com.firstbrain.data.remote.RecommendRequest
 import com.firstbrain.data.remote.TaskFeatures
@@ -40,6 +42,7 @@ import kotlin.math.max
 class TaskRepository @Inject constructor(
     private val taskDao: TaskDao,
     private val interactionDao: InteractionDao,
+    private val feedbackOutboxDao: FeedbackOutboxDao,
     private val recommendationApi: RecommendationApi,
     private val workManager: WorkManager,
     @IoDispatcher private val io: CoroutineDispatcher,
@@ -73,6 +76,7 @@ class TaskRepository @Inject constructor(
         taskDao.insert(task)
         scheduleReminders(task)
         rescoreAll()
+        SyncWorker.enqueueNow(workManager)
         task.id
     }
 
@@ -154,6 +158,7 @@ class TaskRepository @Inject constructor(
     suspend fun delete(id: String) = withContext(io) {
         cancelReminders(id)
         taskDao.softDelete(id, System.currentTimeMillis())
+        SyncWorker.enqueueNow(workManager)
     }
 
     suspend fun logViewed(id: String) = withContext(io) {
@@ -256,19 +261,16 @@ class TaskRepository @Inject constructor(
         )
 
         mapFeedbackAction(action)?.let { serverAction ->
-            try {
-                recommendationApi.sendFeedback(
-                    FeedbackRequest(
-                        task_id = id,
-                        action = serverAction,
-                        score = current.recScore
-                    )
+            feedbackOutboxDao.insert(
+                FeedbackOutboxEntity(
+                    taskId = id,
+                    action = serverAction,
+                    score = current.recScore,
                 )
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            )
         }
 
         rescoreAll()
+        SyncWorker.enqueueNow(workManager)
     }
 }
