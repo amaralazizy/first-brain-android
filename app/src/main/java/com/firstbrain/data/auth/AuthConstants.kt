@@ -6,7 +6,7 @@ object AuthConstants {
     const val NEON_DATA_URL =
         "https://ep-proud-resonance-amlj3hjf.apirest.c-5.us-east-1.aws.neon.tech/neondb/rest/v1/"
     const val RECOMMENDATION_URL =
-        "https://ml-api-production-394a.up.railway.app/"
+        "https://amaralazizy-first-brain-engine.hf.space/"
 
     /** Origin header value; must match a trusted origin on the Neon Auth server. */
     const val ORIGIN = "http://localhost"
