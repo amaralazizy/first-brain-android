@@ -2,6 +2,7 @@ package com.firstbrain.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.work.WorkManager
 import com.firstbrain.data.local.AppDatabase
 import com.firstbrain.data.local.InteractionDao
 import com.firstbrain.data.local.TaskDao
@@ -25,4 +26,9 @@ object DatabaseModule {
 
     @Provides fun taskDao(db: AppDatabase): TaskDao = db.taskDao()
     @Provides fun interactionDao(db: AppDatabase): InteractionDao = db.interactionDao()
+
+    @Provides
+    @Singleton
+    fun workManager(@ApplicationContext ctx: Context): WorkManager =
+        WorkManager.getInstance(ctx)
 }

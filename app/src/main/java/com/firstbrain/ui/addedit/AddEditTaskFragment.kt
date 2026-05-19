@@ -1,6 +1,7 @@
 package com.firstbrain.ui.addedit
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,8 +20,10 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Calendar
 
 @AndroidEntryPoint
@@ -31,6 +34,7 @@ class AddEditTaskFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var deadline: Instant? = null
+    private val dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
@@ -40,10 +44,10 @@ class AddEditTaskFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.deadlineBtn.setOnClickListener { showDatePicker() }
+        binding.deadlineBtn.setOnClickListener { showDateTimePicker() }
         binding.clearDeadlineBtn.setOnClickListener {
             deadline = null
-            binding.deadlineLabel.text = getString(R.string.no_deadline)
+            updateDeadlineLabel()
         }
 
         binding.saveBtn.setOnClickListener {
@@ -83,21 +87,38 @@ class AddEditTaskFragment : Fragment() {
         }
     }
 
-    private fun showDatePicker() {
-        val today = Calendar.getInstance()
+    private fun showDateTimePicker() {
+        val now = Calendar.getInstance()
         DatePickerDialog(
             requireContext(),
             { _, year, month, day ->
-                val picked = LocalDate.of(year, month + 1, day)
-                    .atStartOfDay(ZoneId.systemDefault())
-                    .toInstant()
-                deadline = picked
-                binding.deadlineLabel.text = picked.atZone(ZoneId.systemDefault()).toLocalDate().toString()
+                TimePickerDialog(
+                    requireContext(),
+                    { _, hour, minute ->
+                        val picked = LocalDateTime.of(year, month + 1, day, hour, minute)
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant()
+                        deadline = picked
+                        updateDeadlineLabel()
+                    },
+                    now.get(Calendar.HOUR_OF_DAY),
+                    now.get(Calendar.MINUTE),
+                    false // Use 24-hour format or system default
+                ).show()
             },
-            today.get(Calendar.YEAR),
-            today.get(Calendar.MONTH),
-            today.get(Calendar.DAY_OF_MONTH),
+            now.get(Calendar.YEAR),
+            now.get(Calendar.MONTH),
+            now.get(Calendar.DAY_OF_MONTH),
         ).show()
+    }
+
+    private fun updateDeadlineLabel() {
+        val d = deadline
+        if (d == null) {
+            binding.deadlineLabel.text = getString(R.string.no_deadline)
+        } else {
+            binding.deadlineLabel.text = d.atZone(ZoneId.systemDefault()).format(dateTimeFormatter)
+        }
     }
 
     override fun onDestroyView() {

@@ -36,6 +36,14 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE status = 'pending'")
     suspend fun pending(): List<TaskEntity>
 
+    @Query("""
+        SELECT * FROM tasks
+        WHERE status = 'pending'
+        ORDER BY rec_score DESC, urgency DESC
+        LIMIT :limit
+    """)
+    suspend fun topPending(limit: Int): List<TaskEntity>
+
     @Insert
     suspend fun insert(task: TaskEntity): Long
 

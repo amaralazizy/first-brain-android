@@ -1,5 +1,9 @@
 package com.firstbrain.data.repo
 
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.firstbrain.data.local.InteractionAction
 import com.firstbrain.data.local.InteractionDao
 import com.firstbrain.data.local.InteractionEntity
@@ -9,10 +13,13 @@ import com.firstbrain.data.local.TaskStatus
 import com.firstbrain.data.local.TaskType
 import com.firstbrain.data.local.Urgency
 import com.firstbrain.di.IoDispatcher
+import com.firstbrain.worker.ReminderWorker
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,6 +32,7 @@ import javax.inject.Singleton
 class TaskRepository @Inject constructor(
     private val taskDao: TaskDao,
     private val interactionDao: InteractionDao,
+    private val workManager: WorkManager,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
 
@@ -43,28 +51,79 @@ class TaskRepository @Inject constructor(
         deadline: Instant?,
         hasDeadline: Boolean,
     ): Long = withContext(io) {
-        val id = taskDao.insert(
-            TaskEntity(
-                title = title,
-                description = description,
-                urgency = urgency,
-                taskType = taskType,
-                estimatedEffort = estimatedEffort,
-                deadline = deadline,
-                hasDeadline = hasDeadline,
-            ),
+        val task = TaskEntity(
+            title = title,
+            description = description,
+            urgency = urgency,
+            taskType = taskType,
+            estimatedEffort = estimatedEffort,
+            deadline = deadline,
+            hasDeadline = hasDeadline,
         )
+        val id = taskDao.insert(task)
+        val savedTask = task.copy(id = id.toInt())
+        scheduleReminders(savedTask)
         rescoreAll()
         id
     }
 
+    private fun scheduleReminders(task: TaskEntity) {
+        val deadline = task.deadline ?: return
+        val now = Instant.now()
+
+        // 1. One day before
+        val oneDayBefore = deadline.minus(Duration.ofDays(1))
+        if (oneDayBefore.isAfter(now)) {
+            val delay = Duration.between(now, oneDayBefore).toMillis()
+            enqueueReminder(task.id, delay, ReminderWorker.TYPE_ONE_DAY)
+        }
+
+        // 2. Effort + 1 hour before
+        // estimatedEffort is in hours
+        val finalCallTime = deadline.minus(Duration.ofHours(task.estimatedEffort.toLong() + 1))
+        if (finalCallTime.isAfter(now)) {
+            val delay = Duration.between(now, finalCallTime).toMillis()
+            enqueueReminder(task.id, delay, ReminderWorker.TYPE_FINAL_CALL)
+        }
+
+        // 3. At deadline
+        if (deadline.isAfter(now)) {
+            val delay = Duration.between(now, deadline).toMillis()
+            enqueueReminder(task.id, delay, ReminderWorker.TYPE_DEADLINE)
+        }
+    }
+
+    private fun enqueueReminder(taskId: Int, delayMs: Long, type: String) {
+        val workData = Data.Builder()
+            .putInt(ReminderWorker.KEY_TASK_ID, taskId)
+            .putString(ReminderWorker.KEY_REMINDER_TYPE, type)
+            .build()
+
+        val request = OneTimeWorkRequestBuilder<ReminderWorker>()
+            .setInitialDelay(delayMs, TimeUnit.MILLISECONDS)
+            .setInputData(workData)
+            .addTag("task_reminder_$taskId")
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "task_reminder_${taskId}_$type",
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
+    }
+
     suspend fun complete(id: Int) = mutate(id, InteractionAction.completed) { task ->
+        cancelReminders(id)
         task.copy(
             status = TaskStatus.completed,
             completedAt = Instant.now(),
             updatedAt = Instant.now(),
             lastInteractedAt = Instant.now(),
         )
+    }
+
+    private fun cancelReminders(taskId: Int) {
+        workManager.cancelAllWorkByTag("task_reminder_$taskId")
     }
 
     suspend fun skip(id: Int) = mutate(id, InteractionAction.skipped) { task ->
@@ -77,15 +136,20 @@ class TaskRepository @Inject constructor(
     }
 
     suspend fun reopen(id: Int) = mutate(id, InteractionAction.reopened) { task ->
-        task.copy(
+        val updated = task.copy(
             status = TaskStatus.pending,
             completedAt = null,
             updatedAt = Instant.now(),
             lastInteractedAt = Instant.now(),
         )
+        scheduleReminders(updated)
+        updated
     }
 
-    suspend fun delete(id: Int) = withContext(io) { taskDao.deleteById(id) }
+    suspend fun delete(id: Int) = withContext(io) {
+        cancelReminders(id)
+        taskDao.deleteById(id)
+    }
 
     suspend fun logViewed(id: Int) = withContext(io) {
         interactionDao.insert(

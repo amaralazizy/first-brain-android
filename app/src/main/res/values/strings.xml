@@ -22,7 +22,7 @@
     <string name="action_delete">Delete</string>
     <string name="action_save">Save</string>
     <string name="action_refresh">Refresh</string>
-    <string name="action_pick_deadline">Pick date</string>
+    <string name="action_pick_deadline">Set deadline</string>
     <string name="action_clear">Clear</string>
 
     <string name="cd_add_task">Add task</string>
