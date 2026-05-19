@@ -63,13 +63,7 @@
         android:name="com.firstbrain.ui.addedit.AddEditTaskFragment"
         android:label="@string/title_add_task"
         tools:layout="@layout/fragment_add_edit_task"
-        xmlns:tools="http://schemas.android.com/tools">
-        <argument
-            android:name="taskId"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
-    </fragment>
+        xmlns:tools="http://schemas.android.com/tools" />
 
     <fragment
         android:id="@+id/taskDetailFragment"

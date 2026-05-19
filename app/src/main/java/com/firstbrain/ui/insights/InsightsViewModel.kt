@@ -4,8 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.firstbrain.data.local.TaskDao
 import com.firstbrain.data.local.TaskEntity
-import com.firstbrain.data.repo.FeatureContribution
-import com.firstbrain.data.repo.RankingHeuristic
+import com.firstbrain.data.remote.FeatureContribution
 import com.firstbrain.data.repo.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,7 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Instant
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 data class InsightsState(
@@ -22,23 +22,30 @@ data class InsightsState(
 )
 
 /**
- * Insights surface the heuristic that picks today's recommendations.
- * For the top-scoring pending task we break the score down by component so
- * the user can see *why* it was chosen — the local analogue of the SHAP
- * panel in the web version.
+ * Surfaces the SHAP-style explanation for today's top pick. The contributions
+ * come straight from the ML server's `/recommend` response — persisted on the
+ * task row in `explanation_json` and rendered as-is.
  */
 @HiltViewModel
 class InsightsViewModel @Inject constructor(
     taskDao: TaskDao,
     private val repo: TaskRepository,
+    private val json: Json,
 ) : ViewModel() {
 
     val state: StateFlow<InsightsState> = taskDao.observePicks()
         .map { picks ->
             val top = picks.firstOrNull() ?: return@map InsightsState()
-            InsightsState(topTask = top, contributions = RankingHeuristic.breakdown(top, Instant.now()))
+            InsightsState(topTask = top, contributions = parseContributions(top.explanationJson))
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InsightsState())
 
     fun refresh() = viewModelScope.launch { repo.rescoreAll() }
+
+    private fun parseContributions(jsonStr: String?): List<FeatureContribution> {
+        if (jsonStr.isNullOrEmpty()) return emptyList()
+        return runCatching {
+            json.decodeFromString(ListSerializer(FeatureContribution.serializer()), jsonStr)
+        }.getOrDefault(emptyList())
+    }
 }

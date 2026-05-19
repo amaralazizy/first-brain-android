@@ -47,9 +47,9 @@ class InsightsFragment : Fragment() {
                             R.string.insights_top_score, top.recScore?.formatScore() ?: "—",
                         )
                         binding.explanations.text = s.contributions
-                            .sortedByDescending { kotlin.math.abs(it.value) }
+                            .sortedByDescending { kotlin.math.abs(it.shap_value) }
                             .joinToString("\n") {
-                                String.format(Locale.getDefault(), "%-22s %+.2f", it.label, it.value)
+                                String.format(Locale.getDefault(), "%-22s %+.2f", it.feature, it.shap_value)
                             }
                     }
                 }

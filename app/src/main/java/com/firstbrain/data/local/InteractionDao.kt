@@ -14,12 +14,6 @@ interface InteractionDao {
     @Query("SELECT * FROM task_interactions WHERE task_id = :taskId ORDER BY occurred_at DESC")
     fun observeForTask(taskId: String): Flow<List<InteractionEntity>>
 
-    @Query("SELECT * FROM task_interactions ORDER BY occurred_at DESC LIMIT :limit")
-    fun observeRecent(limit: Int = 200): Flow<List<InteractionEntity>>
-
-    @Query("SELECT COUNT(*) FROM task_interactions WHERE action = :action")
-    suspend fun countByAction(action: InteractionAction): Int
-
     @Query("""
         SELECT `action`, COUNT(*) AS count
         FROM task_interactions

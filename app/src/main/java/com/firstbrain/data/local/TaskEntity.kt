@@ -22,8 +22,10 @@ data class TaskEntity(
     @ColumnInfo(name = "updated_at") val updatedAt: Instant = Instant.now(),
     @ColumnInfo(name = "completed_at") val completedAt: Instant? = null,
     @ColumnInfo(name = "last_interacted_at") val lastInteractedAt: Instant? = null,
-    /** Cached recommendation score from local heuristic or remote model. */
+    /** Cached recommendation score from the ML server. */
     @ColumnInfo(name = "rec_score") val recScore: Double? = null,
+    /** Serialized `List<FeatureContribution>` from the last /recommend response. */
+    @ColumnInfo(name = "explanation_json") val explanationJson: String? = null,
     /** Sync flags for remote Neon Postgres. */
     @ColumnInfo(name = "dirty") val dirty: Boolean = true,
     @ColumnInfo(name = "deleted") val deleted: Boolean = false,

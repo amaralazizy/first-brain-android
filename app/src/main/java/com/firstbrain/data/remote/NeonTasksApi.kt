@@ -1,9 +1,7 @@
 package com.firstbrain.data.remote
 
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -42,8 +40,4 @@ interface NeonTasksApi {
     )
     @POST("tasks")
     suspend fun upsert(@Body rows: List<TaskRemoteDto>): List<TaskRemoteDto>
-
-    /** Hard delete — rarely used; we soft-delete via upsert(deleted=true). */
-    @DELETE("tasks")
-    suspend fun hardDelete(@Query("id") idFilter: String)   // "eq.<uuid>"
 }

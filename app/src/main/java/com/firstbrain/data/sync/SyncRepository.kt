@@ -104,7 +104,9 @@ class SyncRepository @Inject constructor(
             if (local != null && local.updatedAt >= java.time.Instant.parse(dto.updated_at)) {
                 continue
             }
-            taskDao.upsert(dto.toEntity())
+            // Server doesn't store SHAP explanations; preserve the local cache so
+            // the Insights / TaskAdapter rationale survives a pull.
+            taskDao.upsert(dto.toEntity().copy(explanationJson = local?.explanationJson))
             if (highWater == null || dto.updated_at > highWater) {
                 highWater = dto.updated_at
             }

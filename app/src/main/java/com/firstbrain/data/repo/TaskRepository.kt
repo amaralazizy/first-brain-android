@@ -17,10 +17,13 @@ import com.firstbrain.data.local.Urgency
 import com.firstbrain.di.IoDispatcher
 import com.firstbrain.worker.ReminderWorker
 import com.firstbrain.worker.SyncWorker
+import com.firstbrain.data.remote.FeatureContribution
 import com.firstbrain.data.remote.RecommendationApi
 import com.firstbrain.data.remote.RecommendRequest
 import com.firstbrain.data.remote.TaskFeatures
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.time.DayOfWeek
@@ -45,6 +48,7 @@ class TaskRepository @Inject constructor(
     private val feedbackOutboxDao: FeedbackOutboxDao,
     private val recommendationApi: RecommendationApi,
     private val workManager: WorkManager,
+    private val json: Json,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
 
@@ -167,14 +171,13 @@ class TaskRepository @Inject constructor(
         )
     }
 
-    /** Recompute the score for every pending task using the AI Model API. */
+    /** Recompute the score + SHAP explanation for every pending task via the ML server. */
     suspend fun rescoreAll() = withContext(io) {
         val pendingTasks = taskDao.pending()
         if (pendingTasks.isEmpty()) return@withContext
 
         val now = Instant.now()
         val zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault())
-
         val features = pendingTasks.map { mapToFeatures(it, zdt) }
 
         try {
@@ -182,13 +185,16 @@ class TaskRepository @Inject constructor(
                 RecommendRequest(tasks = features, top_k = features.size)
             )
             scores.forEach { response ->
-                taskDao.updateScore(response.id, response.score)
+                val explanationJson = json.encodeToString(
+                    ListSerializer(FeatureContribution.serializer()),
+                    response.explanation,
+                )
+                taskDao.updateScore(response.id, response.score, explanationJson)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            pendingTasks.forEach { task ->
-                taskDao.updateScore(task.id, RankingHeuristic.score(task, now))
-            }
+            // Server unreachable — leave stale rec_score in place. Next successful
+            // /recommend will refresh; UI already orders by NULL-last for new tasks.
         }
     }
 

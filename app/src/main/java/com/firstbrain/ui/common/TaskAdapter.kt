@@ -8,7 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.firstbrain.R
 import com.firstbrain.data.local.TaskEntity
 import com.firstbrain.data.local.TaskStatus
+import com.firstbrain.data.remote.FeatureContribution
 import com.firstbrain.databinding.ItemTaskBinding
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
+
+private val explanationJson = Json { ignoreUnknownKeys = true }
+private val explanationSerializer = ListSerializer(FeatureContribution.serializer())
 
 class TaskAdapter(
     private val showScore: Boolean = false,
@@ -50,12 +56,16 @@ class TaskAdapter(
             binding.deadline.visibility = if (deadline == null) android.view.View.GONE
                                          else android.view.View.VISIBLE
 
-            val breakdown = com.firstbrain.data.repo.RankingHeuristic.breakdown(task)
-            val topReasons = breakdown.sortedByDescending { Math.abs(it.value) }.take(3)
-            val reasonsText = topReasons.joinToString("\n") { 
-                val symbol = if (it.value > 0) "▲" else "▼"
-                "$symbol ${it.label}"
-            }
+            val contributions = task.explanationJson?.let { raw ->
+                runCatching { explanationJson.decodeFromString(explanationSerializer, raw) }.getOrNull()
+            } ?: emptyList()
+            val reasonsText = contributions
+                .sortedByDescending { kotlin.math.abs(it.shap_value) }
+                .take(3)
+                .joinToString("\n") {
+                    val symbol = if (it.shap_value > 0) "▲" else "▼"
+                    "$symbol ${it.feature}"
+                }
             binding.explanationText.text = reasonsText
             binding.explanationHeader.visibility = if (reasonsText.isBlank()) android.view.View.GONE else android.view.View.VISIBLE
             binding.explanationText.visibility = if (reasonsText.isBlank()) android.view.View.GONE else android.view.View.VISIBLE
