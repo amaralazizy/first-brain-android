@@ -1,0 +1,28 @@
+# Python
+**/.venv
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/tests/
+recommendation-engine/models/*.joblib
+recommendation-engine/models/feedback.jsonl
+
+# Android — not part of the Python image
+app/
+gradle/
+.gradle/
+build/
+**/build/
+*.iml
+local.properties
+gradlew
+gradlew.bat
+gradle.properties
+settings.gradle.kts
+build.gradle.kts
+
+# Git / IDE
+.git/
+.idea/
+.vscode/

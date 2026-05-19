@@ -19,7 +19,7 @@ class TasksViewModel @Inject constructor(
     val tasks: StateFlow<List<TaskEntity>> = repo.observeTasks()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun complete(id: Int) = viewModelScope.launch { repo.complete(id) }
-    fun skip(id: Int) = viewModelScope.launch { repo.skip(id) }
-    fun reopen(id: Int) = viewModelScope.launch { repo.reopen(id) }
+    fun complete(id: String) = viewModelScope.launch { repo.complete(id) }
+    fun skip(id: String) = viewModelScope.launch { repo.skip(id) }
+    fun reopen(id: String) = viewModelScope.launch { repo.reopen(id) }
 }

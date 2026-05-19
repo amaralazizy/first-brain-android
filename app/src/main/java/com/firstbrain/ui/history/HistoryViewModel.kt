@@ -41,5 +41,5 @@ class HistoryViewModel @Inject constructor(
 
     fun setFilter(f: HistoryFilter) { filter.value = f }
 
-    fun reopen(id: Int) = viewModelScope.launch { repo.reopen(id) }
+    fun reopen(id: String) = viewModelScope.launch { repo.reopen(id) }
 }

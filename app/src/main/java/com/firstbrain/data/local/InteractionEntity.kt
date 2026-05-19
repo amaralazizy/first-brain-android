@@ -21,7 +21,7 @@ import java.time.Instant
 )
 data class InteractionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    @ColumnInfo(name = "task_id") val taskId: Int,
+    @ColumnInfo(name = "task_id") val taskId: String,
     val action: InteractionAction,
     @ColumnInfo(name = "occurred_at") val occurredAt: Instant,
     /** Optional recommendation score at the time the interaction happened. */

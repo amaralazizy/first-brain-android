@@ -35,6 +35,6 @@ class TodaysPicksViewModel @Inject constructor(
         }
     }
 
-    fun complete(id: Int) = viewModelScope.launch { repo.complete(id) }
-    fun skip(id: Int) = viewModelScope.launch { repo.skip(id) }
+    fun complete(id: String) = viewModelScope.launch { repo.complete(id) }
+    fun skip(id: String) = viewModelScope.launch { repo.skip(id) }
 }

@@ -1,0 +1,101 @@
+{
+  "roc_auc": 0.749348076642714,
+  "precision_at_5": 1.0,
+  "recall_at_5": 0.0021570319240724763,
+  "f1": 0.7337254106672074,
+  "avg_precision": 0.7850581948678499,
+  "calibration_error": 0.028236599194075784,
+  "n_train": 12077,
+  "n_test": 4200,
+  "n_features": 17,
+  "feature_names": [
+    "days_since_creation",
+    "days_since_last_interaction",
+    "days_until_deadline",
+    "is_overdue",
+    "deadline_proximity",
+    "skip_count",
+    "estimated_effort",
+    "has_deadline",
+    "weekday",
+    "is_weekend",
+    "task_type_Do",
+    "task_type_Learn",
+    "task_type_Life",
+    "task_type_Idea",
+    "urgency_Low",
+    "urgency_Medium",
+    "urgency_High"
+  ],
+  "feature_importances": [
+    {
+      "feature": "is_overdue",
+      "importance": 0.203048
+    },
+    {
+      "feature": "deadline_proximity",
+      "importance": 0.172706
+    },
+    {
+      "feature": "weekday",
+      "importance": 0.110647
+    },
+    {
+      "feature": "is_weekend",
+      "importance": 0.088981
+    },
+    {
+      "feature": "urgency_Low",
+      "importance": 0.084332
+    },
+    {
+      "feature": "skip_count",
+      "importance": 0.070397
+    },
+    {
+      "feature": "urgency_High",
+      "importance": 0.052229
+    },
+    {
+      "feature": "task_type_Idea",
+      "importance": 0.051161
+    },
+    {
+      "feature": "urgency_Medium",
+      "importance": 0.043893
+    },
+    {
+      "feature": "task_type_Do",
+      "importance": 0.022799
+    },
+    {
+      "feature": "days_until_deadline",
+      "importance": 0.016543
+    },
+    {
+      "feature": "estimated_effort",
+      "importance": 0.015785
+    },
+    {
+      "feature": "days_since_creation",
+      "importance": 0.015601
+    },
+    {
+      "feature": "has_deadline",
+      "importance": 0.015312
+    },
+    {
+      "feature": "days_since_last_interaction",
+      "importance": 0.013455
+    },
+    {
+      "feature": "task_type_Learn",
+      "importance": 0.01279
+    },
+    {
+      "feature": "task_type_Life",
+      "importance": 0.01032
+    }
+  ],
+  "trained_at": "2026-04-23T02:42:36.472562+00:00"
+}

@@ -4,10 +4,11 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.Instant
+import java.util.UUID
 
 @Entity(tableName = "tasks")
 data class TaskEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val title: String,
     val description: String?,
     val urgency: Urgency,
@@ -21,6 +22,9 @@ data class TaskEntity(
     @ColumnInfo(name = "updated_at") val updatedAt: Instant = Instant.now(),
     @ColumnInfo(name = "completed_at") val completedAt: Instant? = null,
     @ColumnInfo(name = "last_interacted_at") val lastInteractedAt: Instant? = null,
-    /** Cached recommendation score from the local ranking heuristic. */
+    /** Cached recommendation score from local heuristic or remote model. */
     @ColumnInfo(name = "rec_score") val recScore: Double? = null,
+    /** Sync flags for remote Neon Postgres. */
+    @ColumnInfo(name = "dirty") val dirty: Boolean = true,
+    @ColumnInfo(name = "deleted") val deleted: Boolean = false,
 )

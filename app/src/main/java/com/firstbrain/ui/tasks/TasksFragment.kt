@@ -36,7 +36,7 @@ class TasksFragment : Fragment() {
             onClick = { task ->
                 findNavController().navigate(
                     R.id.action_tasks_to_detail,
-                    Bundle().apply { putInt("taskId", task.id) },
+                    Bundle().apply { putString("taskId", task.id) },
                 )
             },
             onComplete = { vm.complete(it.id) },

@@ -12,7 +12,7 @@ interface InteractionDao {
     suspend fun insert(interaction: InteractionEntity): Long
 
     @Query("SELECT * FROM task_interactions WHERE task_id = :taskId ORDER BY occurred_at DESC")
-    fun observeForTask(taskId: Int): Flow<List<InteractionEntity>>
+    fun observeForTask(taskId: String): Flow<List<InteractionEntity>>
 
     @Query("SELECT * FROM task_interactions ORDER BY occurred_at DESC LIMIT :limit")
     fun observeRecent(limit: Int = 200): Flow<List<InteractionEntity>>

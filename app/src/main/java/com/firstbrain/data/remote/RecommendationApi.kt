@@ -7,7 +7,7 @@ import retrofit2.http.POST
 
 @Serializable
 data class TaskFeatures(
-    val id: Int,
+    val id: String,
     val days_since_creation: Double,
     val days_since_last_interaction: Double,
     val days_until_deadline: Double,
@@ -36,7 +36,7 @@ data class FeatureContribution(
 
 @Serializable
 data class ScoredTask(
-    val id: Int,
+    val id: String,
     val score: Double,
     val explanation: List<FeatureContribution>
 )
@@ -59,7 +59,7 @@ data class TrainResponse(
 
 @Serializable
 data class FeedbackRequest(
-    val task_id: Int,
+    val task_id: String,
     val action: String, // "complete" | "skip"
     val score: Double? = null
 )

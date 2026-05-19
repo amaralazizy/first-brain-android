@@ -24,10 +24,8 @@ class ReminderWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        val taskId = inputData.getInt(KEY_TASK_ID, -1)
+        val taskId = inputData.getString(KEY_TASK_ID) ?: return Result.failure()
         val reminderType = inputData.getString(KEY_REMINDER_TYPE) ?: ""
-
-        if (taskId == -1) return Result.failure()
 
         val task = taskDao.byId(taskId) ?: return Result.success()
 
@@ -48,7 +46,7 @@ class ReminderWorker @AssistedInject constructor(
             else -> "Reminder for task: ${task.title}"
         }
 
-        showNotification(taskId, title, content)
+        showNotification(taskId.hashCode(), title, content)
 
         return Result.success()
     }

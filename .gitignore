@@ -16,3 +16,12 @@ captures/
 *.jks
 *.keystore
 release/
+
+# Python (recommendation-engine)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.pytest_cache/
+recommendation-engine/models/*.joblib
+recommendation-engine/models/feedback.jsonl

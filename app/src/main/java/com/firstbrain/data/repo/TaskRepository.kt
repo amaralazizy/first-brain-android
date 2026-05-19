@@ -26,6 +26,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,8 +48,8 @@ class TaskRepository @Inject constructor(
     fun observeTasks(): Flow<List<TaskEntity>> = taskDao.observeAll()
     fun observePicks(): Flow<List<TaskEntity>> = taskDao.observePicks()
     fun observeHistory(): Flow<List<TaskEntity>> = taskDao.observeHistory()
-    fun observeTask(id: Int): Flow<TaskEntity?> = taskDao.observeById(id)
-    fun observeInteractions(taskId: Int) = interactionDao.observeForTask(taskId)
+    fun observeTask(id: String): Flow<TaskEntity?> = taskDao.observeById(id)
+    fun observeInteractions(taskId: String) = interactionDao.observeForTask(taskId)
 
     suspend fun createTask(
         title: String,
@@ -58,8 +59,9 @@ class TaskRepository @Inject constructor(
         estimatedEffort: Int,
         deadline: Instant?,
         hasDeadline: Boolean,
-    ): Long = withContext(io) {
+    ): String = withContext(io) {
         val task = TaskEntity(
+            id = UUID.randomUUID().toString(),
             title = title,
             description = description,
             urgency = urgency,
@@ -68,11 +70,10 @@ class TaskRepository @Inject constructor(
             deadline = deadline,
             hasDeadline = hasDeadline,
         )
-        val id = taskDao.insert(task)
-        val savedTask = task.copy(id = id.toInt())
-        scheduleReminders(savedTask)
+        taskDao.insert(task)
+        scheduleReminders(task)
         rescoreAll()
-        id
+        task.id
     }
 
     private fun scheduleReminders(task: TaskEntity) {
@@ -97,9 +98,9 @@ class TaskRepository @Inject constructor(
         }
     }
 
-    private fun enqueueReminder(taskId: Int, delayMs: Long, type: String) {
+    private fun enqueueReminder(taskId: String, delayMs: Long, type: String) {
         val workData = Data.Builder()
-            .putInt(ReminderWorker.KEY_TASK_ID, taskId)
+            .putString(ReminderWorker.KEY_TASK_ID, taskId)
             .putString(ReminderWorker.KEY_REMINDER_TYPE, type)
             .build()
 
@@ -116,7 +117,7 @@ class TaskRepository @Inject constructor(
         )
     }
 
-    suspend fun complete(id: Int) = mutate(id, InteractionAction.completed) { task ->
+    suspend fun complete(id: String) = mutate(id, InteractionAction.completed) { task ->
         cancelReminders(id)
         task.copy(
             status = TaskStatus.completed,
@@ -126,11 +127,11 @@ class TaskRepository @Inject constructor(
         )
     }
 
-    private fun cancelReminders(taskId: Int) {
+    private fun cancelReminders(taskId: String) {
         workManager.cancelAllWorkByTag("task_reminder_$taskId")
     }
 
-    suspend fun skip(id: Int) = mutate(id, InteractionAction.skipped) { task ->
+    suspend fun skip(id: String) = mutate(id, InteractionAction.skipped) { task ->
         task.copy(
             status = TaskStatus.skipped,
             skipCount = task.skipCount + 1,
@@ -139,7 +140,7 @@ class TaskRepository @Inject constructor(
         )
     }
 
-    suspend fun reopen(id: Int) = mutate(id, InteractionAction.reopened) { task ->
+    suspend fun reopen(id: String) = mutate(id, InteractionAction.reopened) { task ->
         val updated = task.copy(
             status = TaskStatus.pending,
             completedAt = null,
@@ -150,12 +151,12 @@ class TaskRepository @Inject constructor(
         updated
     }
 
-    suspend fun delete(id: Int) = withContext(io) {
+    suspend fun delete(id: String) = withContext(io) {
         cancelReminders(id)
-        taskDao.deleteById(id)
+        taskDao.softDelete(id, System.currentTimeMillis())
     }
 
-    suspend fun logViewed(id: Int) = withContext(io) {
+    suspend fun logViewed(id: String) = withContext(io) {
         interactionDao.insert(
             InteractionEntity(taskId = id, action = InteractionAction.viewed, occurredAt = Instant.now()),
         )
@@ -202,7 +203,7 @@ class TaskRepository @Inject constructor(
             1.0 / (1.0 + max(0.0, daysUntilDeadline))
         } else 0.0
 
-        val weekday = now.dayOfWeek.value % 7 // Mon=1..Sun=7 → Mon=1..Sat=6,Sun=0
+        val weekday = now.dayOfWeek.value % 7
         val isWeekend = if (now.dayOfWeek == DayOfWeek.SATURDAY || now.dayOfWeek == DayOfWeek.SUNDAY) 1 else 0
 
         return TaskFeatures(
@@ -243,12 +244,12 @@ class TaskRepository @Inject constructor(
     }
 
     private suspend fun mutate(
-        id: Int,
+        id: String,
         action: InteractionAction,
         transform: (TaskEntity) -> TaskEntity,
     ) = withContext(io) {
         val current = taskDao.byId(id) ?: return@withContext
-        val updated = transform(current)
+        val updated = transform(current).copy(dirty = true)
         taskDao.update(updated)
         interactionDao.insert(
             InteractionEntity(taskId = id, action = action, occurredAt = Instant.now()),

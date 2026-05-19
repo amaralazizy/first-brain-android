@@ -19,7 +19,7 @@ class TaskDetailViewModel @Inject constructor(
     savedState: SavedStateHandle,
 ) : ViewModel() {
 
-    private val taskId: Int = checkNotNull(savedState["taskId"])
+    private val taskId: String = checkNotNull(savedState["taskId"])
 
     val task: StateFlow<TaskEntity?> = repo.observeTask(taskId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
