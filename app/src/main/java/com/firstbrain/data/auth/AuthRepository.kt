@@ -13,7 +13,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
-import java.net.URLEncoder
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,19 +38,17 @@ class AuthRepository @Inject constructor(
     private val refreshMutex = Mutex()
 
     suspend fun signUp(email: String, password: String, name: String) {
-        val res = api.signUp(body = SignUpRequest(email, password, name))
-        persistSession(res)
+        persistSession(api.signUp(body = SignUpRequest(email, password, name)))
     }
 
     suspend fun signIn(email: String, password: String) {
-        val res = api.signIn(body = SignInRequest(email, password))
-        persistSession(res)
+        persistSession(api.signIn(body = SignInRequest(email, password)))
     }
 
     suspend fun signOut() {
-        val session = store.sessionToken
-        if (!session.isNullOrEmpty()) {
-            runCatching { api.signOut(cookie = sessionCookie(session)) }
+        val cookieValue = store.sessionToken
+        if (!cookieValue.isNullOrEmpty()) {
+            runCatching { api.signOut(cookie = "${AuthConstants.SESSION_COOKIE}=$cookieValue") }
         }
         store.clear()
         syncState.clear()
@@ -69,9 +67,9 @@ class AuthRepository @Inject constructor(
         if (!cached.isNullOrEmpty() && exp > now + AuthConstants.JWT_REFRESH_LEEWAY_SECONDS) {
             return@withLock cached
         }
-        val session = store.sessionToken
+        val cookieValue = store.sessionToken
             ?: throw IllegalStateException("Not signed in")
-        val fresh = api.token(cookie = sessionCookie(session)).token
+        val fresh = api.token(cookie = "${AuthConstants.SESSION_COOKIE}=$cookieValue").token
         store.jwt = fresh
         store.jwtExpiresAt = parseJwtExp(fresh)
         fresh
@@ -83,19 +81,36 @@ class AuthRepository @Inject constructor(
         store.jwtExpiresAt = 0
     }
 
-    private fun persistSession(res: AuthResponse) {
-        store.sessionToken = res.token
-        store.userId = res.user.id
+    private fun persistSession(response: Response<AuthResponse>) {
+        if (!response.isSuccessful) {
+            throw IllegalStateException("Auth failed: HTTP ${response.code()}")
+        }
+        val body = response.body() ?: throw IllegalStateException("Empty auth response")
+        val cookieValue = extractSessionCookie(response)
+            ?: throw IllegalStateException("No session cookie in response")
+        store.sessionToken = cookieValue
+        store.userId = body.user.id
         store.jwt = null
         store.jwtExpiresAt = 0
-        _state.value = AuthState.Authenticated(res.user.id)
+        _state.value = AuthState.Authenticated(body.user.id)
         SyncWorker.enqueueNow(workManager)
         SyncWorker.schedulePeriodic(workManager)
     }
 
-    private fun sessionCookie(token: String): String {
-        val encoded = URLEncoder.encode(token, Charsets.UTF_8.name())
-        return "${AuthConstants.SESSION_COOKIE}=$encoded"
+    /**
+     * Pull the URL-encoded value of `__Secure-neon-auth.session_token` out of
+     * the `Set-Cookie` headers. The JSON `token` field is only the first half
+     * of the cookie — the signature suffix lives only in the header.
+     */
+    private fun extractSessionCookie(response: Response<AuthResponse>): String? {
+        val target = "${AuthConstants.SESSION_COOKIE}="
+        for (header in response.headers().values("Set-Cookie")) {
+            if (header.startsWith(target)) {
+                val end = header.indexOf(';').let { if (it == -1) header.length else it }
+                return header.substring(target.length, end)
+            }
+        }
+        return null
     }
 
     private fun parseJwtExp(jwt: String): Long {

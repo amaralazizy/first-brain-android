@@ -1,6 +1,7 @@
 package com.firstbrain.data.auth
 
 import kotlinx.serialization.Serializable
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -44,13 +45,13 @@ interface NeonAuthApi {
     suspend fun signUp(
         @Header("Origin") origin: String = AuthConstants.ORIGIN,
         @Body body: SignUpRequest,
-    ): AuthResponse
+    ): Response<AuthResponse>
 
     @POST("sign-in/email")
     suspend fun signIn(
         @Header("Origin") origin: String = AuthConstants.ORIGIN,
         @Body body: SignInRequest,
-    ): AuthResponse
+    ): Response<AuthResponse>
 
     @POST("sign-out")
     suspend fun signOut(
