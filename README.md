@@ -351,10 +351,19 @@ first-brain-android/
 
 ## 12. Originality & academic integrity
 
-The architecture, Room schema, Fragment navigation graph, sync protocol,
-and written reports are the team's own original work. Portions of the
-implementation (notably the initial scaffolding of the MVVM skeleton and
-the PostgREST mapper) were drafted with AI assistance; every such block
-is annotated inline with `// AI-assisted` comments where the contribution
-is non-trivial. Every team member has read and can explain every line of
-the submission.
+The architecture decisions, Room schema, Fragment navigation graph,
+sync protocol, UI design, and written reports are the team's own
+original work.
+
+Substantial portions of the implementation were drafted with help from
+Claude (Anthropic). Every file that received material AI assistance
+carries a header comment of the form:
+
+```kotlin
+// AI-assisted: drafted with Claude (Anthropic), reviewed and adapted by the team.
+// See README §12 for the team's originality statement.
+```
+
+Files that contain only minor AI-suggested tweaks (renames, single-line
+fixes) are not annotated. Every team member has read and can explain
+every line of the submission.

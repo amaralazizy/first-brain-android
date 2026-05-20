@@ -1,3 +1,6 @@
+// AI-assisted: drafted with Claude (Anthropic), reviewed and adapted by the team.
+// See README §12 for the team's originality statement.
+
 package com.firstbrain.ui.auth
 
 import android.os.Bundle
