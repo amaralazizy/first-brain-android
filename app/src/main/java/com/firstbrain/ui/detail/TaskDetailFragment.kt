@@ -51,15 +51,11 @@ class TaskDetailFragment : Fragment() {
                         binding.description.text =
                             task.description?.takeIf { it.isNotBlank() }
                                 ?: getString(R.string.no_description)
-                        binding.meta.text = getString(
-                            R.string.detail_meta_fmt,
-                            task.urgency.name,
-                            task.taskType.name,
-                            task.estimatedEffort,
-                            task.skipCount,
-                        )
                         binding.deadline.text = task.deadline?.takeIf { task.hasDeadline }
                             ?.formatDate() ?: getString(R.string.no_deadline)
+                        binding.urgencyLabel.text = task.urgency.name
+                        binding.typeLabel.text = task.taskType.name
+                        binding.effortLabel.text = getString(R.string.hours_fmt, task.estimatedEffort.toFloat())
                         binding.created.text = getString(
                             R.string.detail_created_fmt, task.createdAt.formatDateTime(),
                         )

@@ -101,4 +101,5 @@
     <!-- Offline placeholders -->
     <string name="priority_pending_offline">Priority will be calculated once you\'re online.</string>
     <string name="explanations_pending_offline">ML insights will be available once you\'re online.</string>
+    <string name="score_total_denominator">/ 10</string>
 </resources>

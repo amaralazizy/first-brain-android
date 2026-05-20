@@ -51,17 +51,17 @@ class AddEditTaskFragment : Fragment() {
         }
 
         binding.saveBtn.setOnClickListener {
-            val urgency = when (binding.urgencyGroup.checkedRadioButtonId) {
-                R.id.urgencyLow -> Urgency.Low
-                R.id.urgencyHigh -> Urgency.High
-                R.id.urgencyCritical -> Urgency.Critical
+            val urgency = when (binding.urgencyChipGroup.checkedChipId) {
+                R.id.chipLow -> Urgency.Low
+                R.id.chipHigh -> Urgency.High
+                R.id.chipCritical -> Urgency.Critical
                 else -> Urgency.Medium
             }
-            val type = when (binding.typeGroup.checkedRadioButtonId) {
-                R.id.typeWork -> TaskType.work
-                R.id.typeLearning -> TaskType.learning
-                R.id.typeHealth -> TaskType.health
-                R.id.typePersonal -> TaskType.personal
+            val type = when (binding.typeChipGroup.checkedChipId) {
+                R.id.chipWork -> TaskType.work
+                R.id.chipLearning -> TaskType.learning
+                R.id.chipHealth -> TaskType.health
+                R.id.chipPersonal -> TaskType.personal
                 else -> TaskType.other
             }
             vm.save(
