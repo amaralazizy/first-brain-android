@@ -114,7 +114,7 @@ class SyncRepository @Inject constructor(
 
             Log.d(TAG, "Upserting task ${dto.id} (deleted=${dto.deleted})")
             // Server doesn't store SHAP explanations; preserve the local cache so
-            // the Insights / TaskAdapter rationale survives a pull.
+            // the TaskAdapter rationale survives a pull.
             taskDao.upsert(dto.toEntity().copy(explanationJson = local?.explanationJson))
             if (highWater == null || dto.updated_at > highWater) {
                 highWater = dto.updated_at
