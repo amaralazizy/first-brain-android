@@ -192,9 +192,8 @@ class TaskRepository @Inject constructor(
                 taskDao.updateScore(response.id, response.score, explanationJson)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            // Server unreachable — leave stale rec_score in place. Next successful
-            // /recommend will refresh; UI already orders by NULL-last for new tasks.
+            android.util.Log.w("TaskRepository", "rescoreAll failed; leaving stale rec_score", e)
+            // Server unreachable — UI shows the offline placeholder for null scores.
         }
     }
 

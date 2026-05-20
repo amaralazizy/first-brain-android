@@ -2,8 +2,12 @@ package com.firstbrain.data.auth
 
 import android.util.Base64
 import androidx.work.WorkManager
+import com.firstbrain.data.local.AppDatabase
 import com.firstbrain.data.sync.SyncStateStore
+import com.firstbrain.di.IoDispatcher
 import com.firstbrain.worker.SyncWorker
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +32,8 @@ class AuthRepository @Inject constructor(
     private val store: TokenStore,
     private val syncState: SyncStateStore,
     private val workManager: WorkManager,
+    private val database: AppDatabase,
+    @IoDispatcher private val io: CoroutineDispatcher,
 ) {
 
     private val _state = MutableStateFlow<AuthState>(
@@ -53,6 +59,9 @@ class AuthRepository @Inject constructor(
         store.clear()
         syncState.clear()
         SyncWorker.cancelAll(workManager)
+        // Wipe the local cache so the next sign-in (possibly a different account
+        // on this device) doesn't see the previous user's rows.
+        withContext(io) { database.clearAllTables() }
         _state.value = AuthState.Unauthenticated
     }
 

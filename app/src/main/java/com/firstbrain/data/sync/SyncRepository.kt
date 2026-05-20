@@ -1,5 +1,6 @@
 package com.firstbrain.data.sync
 
+import android.util.Log
 import com.firstbrain.data.auth.AuthRepository
 import com.firstbrain.data.auth.AuthState
 import com.firstbrain.data.auth.TokenStore
@@ -50,7 +51,7 @@ class SyncRepository @Inject constructor(
             runCatching {
                 push()
                 pull()
-            }
+            }.onFailure { Log.w(TAG, "syncTasks failed", it) }
         }
     }
 
@@ -67,7 +68,7 @@ class SyncRepository @Inject constructor(
                 )
                 feedbackDao.delete(event.id)
             }
-        }
+        }.onFailure { Log.w(TAG, "drainFeedback failed", it) }
     }
 
     /** One-shot full reconcile: tasks + feedback. */
@@ -113,5 +114,9 @@ class SyncRepository @Inject constructor(
             }
         }
         if (highWater != null) syncState.setLastSyncedAt(userId, highWater)
+    }
+
+    private companion object {
+        const val TAG = "SyncRepository"
     }
 }
