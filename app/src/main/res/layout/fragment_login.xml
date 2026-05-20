@@ -17,64 +17,77 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="@dimen/spacing_lg"
-            android:gravity="center_horizontal">
+            android:padding="@dimen/spacing_xl">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginTop="48dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_launcher_foreground"
+                app:tint="@color/primary" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="64dp"
+                android:layout_marginTop="@dimen/spacing_lg"
                 android:text="@string/auth_welcome"
                 android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:gravity="center"
                 android:text="@string/auth_subtitle_login"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/text_secondary" />
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="40dp"
                 android:hint="@string/field_email"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                app:startIconDrawable="@drawable/ic_email">
+
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/emailInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"
-                    android:autofillHints="emailAddress" />
+                    android:autofillHints="emailAddress"
+                    android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_md"
                 android:hint="@string/field_password"
                 app:passwordToggleEnabled="true"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                app:startIconDrawable="@drawable/ic_lock">
+
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:autofillHints="password" />
+                    android:autofillHints="password"
+                    android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/signInBtn"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_lg"
+                android:layout_height="56dp"
+                android:layout_marginTop="32dp"
                 android:text="@string/action_signin"
-                app:backgroundTint="@color/button_blue"
-                app:cornerRadius="24dp" />
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="28dp" />
 
             <ProgressBar
                 android:id="@+id/progress"
@@ -89,7 +102,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_md"
-                android:text="@string/auth_switch_to_signup" />
+                android:text="@string/auth_switch_to_signup"
+                android:textColor="@color/text_secondary" />
 
         </LinearLayout>
     </ScrollView>

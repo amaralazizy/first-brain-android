@@ -5,7 +5,7 @@ import com.firstbrain.data.auth.AuthInterceptor
 import com.firstbrain.data.auth.NeonAuthApi
 import com.firstbrain.data.remote.NeonTasksApi
 import com.firstbrain.data.remote.RecommendationApi
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

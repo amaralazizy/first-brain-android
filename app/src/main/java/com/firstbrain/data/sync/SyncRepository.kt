@@ -97,15 +97,22 @@ class SyncRepository @Inject constructor(
         } else {
             tasksApi.listSince("gt.$since")
         }
+        Log.d(TAG, "Pulling for $userId: since=$since, found ${incoming.size} tasks")
         if (incoming.isEmpty()) return
 
         var highWater = since
         for (dto in incoming) {
             val local = taskDao.byId(dto.id)
-            // Skip if the local copy is at least as fresh — protects unflushed edits.
-            if (local != null && local.updatedAt >= parseInstant(dto.updated_at)) {
+            val incomingUpdatedAt = runCatching { parseInstant(dto.updated_at) }.getOrNull()
+
+            // Skip if the local copy is strictly fresher — protects unflushed edits.
+            // If local is null (first sync), we always want it.
+            if (local != null && incomingUpdatedAt != null && local.updatedAt >= incomingUpdatedAt) {
+                Log.v(TAG, "Skipping stale task ${dto.id}: local=${local.updatedAt}, remote=${dto.updated_at}")
                 continue
             }
+
+            Log.d(TAG, "Upserting task ${dto.id} (deleted=${dto.deleted})")
             // Server doesn't store SHAP explanations; preserve the local cache so
             // the Insights / TaskAdapter rationale survives a pull.
             taskDao.upsert(dto.toEntity().copy(explanationJson = local?.explanationJson))
