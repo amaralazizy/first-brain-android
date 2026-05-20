@@ -8,6 +8,7 @@ import com.firstbrain.data.local.TaskDao
 import com.firstbrain.data.remote.FeedbackRequest
 import com.firstbrain.data.remote.NeonTasksApi
 import com.firstbrain.data.remote.RecommendationApi
+import com.firstbrain.data.remote.parseInstant
 import com.firstbrain.data.remote.toEntity
 import com.firstbrain.data.remote.toRemoteDto
 import com.firstbrain.di.IoDispatcher
@@ -101,7 +102,7 @@ class SyncRepository @Inject constructor(
         for (dto in incoming) {
             val local = taskDao.byId(dto.id)
             // Skip if the local copy is at least as fresh — protects unflushed edits.
-            if (local != null && local.updatedAt >= java.time.Instant.parse(dto.updated_at)) {
+            if (local != null && local.updatedAt >= parseInstant(dto.updated_at)) {
                 continue
             }
             // Server doesn't store SHAP explanations; preserve the local cache so
