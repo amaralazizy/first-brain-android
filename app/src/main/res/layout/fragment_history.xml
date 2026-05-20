@@ -17,7 +17,7 @@
             android:id="@+id/history_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Completed and skipped tasks"
+            android:text="@string/history_subtitle"
             android:textAppearance="?attr/textAppearanceBodySmall"
             android:textColor="@color/text_secondary"
             app:layout_constraintStart_toStartOf="parent"
@@ -36,9 +36,9 @@
         app:tabTextColor="@color/text_secondary"
         app:tabTextAppearance="@style/TextAppearance.Material3.LabelLarge"
         app:tabMode="fixed">
-        <com.google.android.material.tabs.TabItem android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="All" />
-        <com.google.android.material.tabs.TabItem android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Completed" />
-        <com.google.android.material.tabs.TabItem android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Skipped" />
+        <com.google.android.material.tabs.TabItem android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/history_tab_all" />
+        <com.google.android.material.tabs.TabItem android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/history_tab_completed" />
+        <com.google.android.material.tabs.TabItem android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/history_tab_skipped" />
     </com.google.android.material.tabs.TabLayout>
 
     <FrameLayout

@@ -117,6 +117,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Exposed to [com.firstbrain.ui.history.HistoryFragment] so it can drive the
+     * inline counters built into the toolbar without reaching across binding
+     * boundaries with findViewById.
+     */
+    fun setToolbarStats(done: Int?, skipped: Int?, visible: Boolean) {
+        binding.toolbarStats.visibility = if (visible) View.VISIBLE else View.GONE
+        if (done != null) binding.toolbarDoneCount.text = done.toString()
+        if (skipped != null) binding.toolbarSkippedCount.text = skipped.toString()
+    }
+
     private fun askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=

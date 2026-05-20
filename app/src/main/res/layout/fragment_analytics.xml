@@ -30,7 +30,7 @@
                     android:layout_weight="1"
                     android:layout_margin="4dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Tasks" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_total_tasks" android:textSize="12sp" android:textColor="@color/text_secondary" />
                         <TextView android:id="@+id/totalValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceHeadlineMedium" tools:text="11" />
                         <TextView android:id="@+id/completionRate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="@color/text_secondary" tools:text="36% completion rate" />
                     </LinearLayout>
@@ -43,7 +43,7 @@
                     android:layout_weight="1"
                     android:layout_margin="4dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Completed" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_completed" android:textSize="12sp" android:textColor="@color/text_secondary" />
                         <TextView android:id="@+id/completedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceHeadlineMedium" tools:text="4" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -62,7 +62,7 @@
                     android:layout_weight="1"
                     android:layout_margin="4dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Skipped" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_skipped" android:textSize="12sp" android:textColor="@color/text_secondary" />
                         <TextView android:id="@+id/skippedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceHeadlineMedium" tools:text="4" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -74,7 +74,7 @@
                     android:layout_weight="1"
                     android:layout_margin="4dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pending" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_pending" android:textSize="12sp" android:textColor="@color/text_secondary" />
                         <TextView android:id="@+id/pendingValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceHeadlineMedium" tools:text="3" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -93,9 +93,9 @@
                     android:layout_weight="1"
                     android:layout_margin="4dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Avg Effort" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_avg_effort" android:textSize="12sp" android:textColor="@color/text_secondary" />
                         <TextView android:id="@+id/avgEffort" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceHeadlineMedium" tools:text="2.8h" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="@color/text_secondary" android:text="per task" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="@color/text_secondary" android:text="@string/analytics_avg_effort_caption" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -106,9 +106,9 @@
                     android:layout_weight="1"
                     android:layout_margin="4dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Hours" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_total_hours" android:textSize="12sp" android:textColor="@color/text_secondary" />
                         <TextView android:id="@+id/totalHours" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceHeadlineMedium" tools:text="31h" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="@color/text_secondary" android:text="estimated backlog" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="@color/text_secondary" android:text="@string/analytics_total_hours_caption" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -121,8 +121,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_lg">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="By Task Type" android:textAppearance="?attr/textAppearanceTitleMedium" android:textStyle="bold" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total (completed / skipped)" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_by_type" android:textAppearance="?attr/textAppearanceTitleMedium" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_by_type_caption" android:textSize="12sp" android:textColor="@color/text_secondary" />
 
                 <LinearLayout android:id="@+id/taskTypeChartContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="16dp" />
             </LinearLayout>
@@ -135,8 +135,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_lg">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="By Urgency" android:textAppearance="?attr/textAppearanceTitleMedium" android:textStyle="bold" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Task count per urgency level" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_by_urgency" android:textAppearance="?attr/textAppearanceTitleMedium" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/analytics_by_urgency_caption" android:textSize="12sp" android:textColor="@color/text_secondary" />
 
                 <LinearLayout android:id="@+id/urgencyChartContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="16dp" />
             </LinearLayout>

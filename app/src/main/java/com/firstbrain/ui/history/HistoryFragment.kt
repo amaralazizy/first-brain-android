@@ -10,7 +10,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firstbrain.R
 import com.firstbrain.databinding.FragmentHistoryBinding
 import com.firstbrain.ui.common.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,11 +53,7 @@ class HistoryFragment : Fragment() {
         })
 
         val mainActivity = activity as? com.firstbrain.ui.MainActivity
-        val toolbarStats = mainActivity?.findViewById<android.view.View>(R.id.toolbar_stats)
-        val toolbarDone = mainActivity?.findViewById<android.widget.TextView>(R.id.toolbar_done_count)
-        val toolbarSkipped = mainActivity?.findViewById<android.widget.TextView>(R.id.toolbar_skipped_count)
-
-        toolbarStats?.visibility = View.VISIBLE
+        mainActivity?.setToolbarStats(done = null, skipped = null, visible = true)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -74,10 +69,10 @@ class HistoryFragment : Fragment() {
                     }
                 }
                 launch {
-                    vm.doneCount.collect { toolbarDone?.text = it.toString() }
+                    vm.doneCount.collect { mainActivity?.setToolbarStats(done = it, skipped = null, visible = true) }
                 }
                 launch {
-                    vm.skippedCount.collect { toolbarSkipped?.text = it.toString() }
+                    vm.skippedCount.collect { mainActivity?.setToolbarStats(done = null, skipped = it, visible = true) }
                 }
             }
         }
@@ -85,10 +80,9 @@ class HistoryFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Hide toolbar stats when leaving History
-        val mainActivity = activity as? com.firstbrain.ui.MainActivity
-        mainActivity?.findViewById<android.view.View>(R.id.toolbar_stats)?.visibility = View.GONE
-
+        (activity as? com.firstbrain.ui.MainActivity)?.setToolbarStats(
+            done = null, skipped = null, visible = false,
+        )
         binding.list.adapter = null
         _binding = null
     }

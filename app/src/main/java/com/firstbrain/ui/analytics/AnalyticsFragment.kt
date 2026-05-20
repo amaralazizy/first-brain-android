@@ -99,34 +99,32 @@ class AnalyticsFragment : Fragment() {
         color: Int,
         subtitle: String? = null
     ) {
-        val inflater = LayoutInflater.from(requireContext())
-        val row = inflater.inflate(R.layout.item_chart_row, container, false)
-        
-        val labelView = row.findViewById<android.widget.TextView>(R.id.label)
-        val barView = row.findViewById<View>(R.id.bar)
-        val countView = row.findViewById<android.widget.TextView>(R.id.count)
-        val subtitleView = row.findViewById<android.widget.TextView>(R.id.subtitle)
+        val rowBinding = com.firstbrain.databinding.ItemChartRowBinding.inflate(
+            LayoutInflater.from(requireContext()), container, false
+        )
 
-        labelView.text = label
-        countView.text = value.toString()
-        barView.setBackgroundColor(androidx.core.content.ContextCompat.getColor(requireContext(), color))
-        
+        rowBinding.label.text = label
+        rowBinding.count.text = value.toString()
+        rowBinding.bar.setBackgroundColor(
+            androidx.core.content.ContextCompat.getColor(requireContext(), color)
+        )
+
         if (subtitle != null) {
-            subtitleView.text = subtitle
-            subtitleView.visibility = View.VISIBLE
+            rowBinding.subtitle.text = subtitle
+            rowBinding.subtitle.visibility = View.VISIBLE
         } else {
-            subtitleView.visibility = View.GONE
+            rowBinding.subtitle.visibility = View.GONE
         }
 
-        row.post {
-            val totalWidth = row.width - labelView.width - countView.width - 100 // Approximation
+        rowBinding.root.post {
+            val totalWidth = rowBinding.root.width - rowBinding.label.width - rowBinding.count.width - 100
             val barWidth = (totalWidth * (value.toDouble() / maxValue)).toInt().coerceAtLeast(10)
-            val params = barView.layoutParams
+            val params = rowBinding.bar.layoutParams
             params.width = barWidth
-            barView.layoutParams = params
+            rowBinding.bar.layoutParams = params
         }
 
-        container.addView(row)
+        container.addView(rowBinding.root)
     }
 
     override fun onDestroyView() {

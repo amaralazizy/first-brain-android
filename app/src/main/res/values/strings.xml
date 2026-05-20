@@ -28,6 +28,30 @@
     <string name="empty_tasks">No tasks. Tap + to add one.</string>
     <string name="empty_history">No completed or skipped tasks yet.</string>
 
+    <string name="toolbar_label_done">done</string>
+    <string name="toolbar_label_skipped">skipped</string>
+
+    <string name="history_subtitle">Completed and skipped tasks</string>
+    <string name="history_tab_all">All</string>
+    <string name="history_tab_completed">Completed</string>
+    <string name="history_tab_skipped">Skipped</string>
+
+    <string name="why_ranked_here">WHY THIS IS RANKED HERE</string>
+    <string name="action_done">Done</string>
+
+    <string name="analytics_total_tasks">Total Tasks</string>
+    <string name="analytics_completed">Completed</string>
+    <string name="analytics_skipped">Skipped</string>
+    <string name="analytics_pending">Pending</string>
+    <string name="analytics_avg_effort">Avg Effort</string>
+    <string name="analytics_avg_effort_caption">per task</string>
+    <string name="analytics_total_hours">Total Hours</string>
+    <string name="analytics_total_hours_caption">estimated backlog</string>
+    <string name="analytics_by_type">By Task Type</string>
+    <string name="analytics_by_type_caption">Total (completed / skipped)</string>
+    <string name="analytics_by_urgency">By Urgency</string>
+    <string name="analytics_by_urgency_caption">Task count per urgency level</string>
+
     <string name="field_title">Title</string>
     <string name="field_description">Description</string>
     <string name="field_urgency">Urgency</string>

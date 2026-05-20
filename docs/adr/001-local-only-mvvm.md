@@ -2,7 +2,12 @@
 
 ## Status
 
-Accepted — 2026-05-18.
+**Superseded** in part by [ADR-002](002-remote-sync.md) on 2026-05-20.
+The MVVM / Room / Hilt / Coroutines / ViewBinding decisions still hold;
+the "no Retrofit / no INTERNET / local heuristic" pieces have been
+reversed once the team decided to ship cross-device sync.
+
+Originally accepted — 2026-05-18.
 
 ## Context
 
